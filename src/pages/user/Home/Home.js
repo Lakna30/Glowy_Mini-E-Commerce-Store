@@ -21,7 +21,7 @@ const Home = () => {
             </div>
             
             {/* Left Section - Text Content */}
-            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -mt-10 z-10 px-6 lg:px-12">
+            <div className="absolute left-8 top-1/2 transform -translate-y-1/2 -mt-10 z-10 px-6 lg:px-12">
               <div className="text-[#E3D5C5] space-y-8 max-w-md">
               
               {/* Main Headline */}
@@ -37,7 +37,7 @@ const Home = () => {
               </p>
               
               {/* CTA Button */}
-              <button className="bg-[#DDBB92] text-[#2B2A29] px-8 py-4 rounded-full font-serif font-semibold text-lg hover:bg-beige-400 transition-colors duration-300 flex items-center space-x-2">
+              <button className="bg-[#DDBB92] text-[#2B2A29] px-8 py-4 rounded-full font-serif font-semibold text-lg hover:bg-[#E3D2BD] transition-colors duration-300 flex items-center space-x-2">
                 <span>Explore more</span>
                 <ArrowRight className="w-5 h-5 translate-y-1" />
               </button>

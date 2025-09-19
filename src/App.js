@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 
@@ -25,76 +25,91 @@ import Footer from './components/shared/Footer/Footer';
 import ProtectedRoute from './components/shared/ProtectedRoute/ProtectedRoute';
 import AdminRoute from './components/shared/AdminRoute/AdminRoute';
 
+// Layout component
+const Layout = ({ children }) => {
+  const location = useLocation();
+
+  const noNavRoutes = ['/login', '/signup'];
+  const noFooterRoutes = ['/login', '/signup', '/cart'];
+
+  const showNavbar = !noNavRoutes.includes(location.pathname);
+  const showFooter = !noFooterRoutes.includes(location.pathname);
+
+  return (
+    <div className="App">
+      {showNavbar && <Navbar />}
+      <main>{children}</main>
+      {showFooter && <Footer />}
+    </div>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
         <Router>
-          <div className="App">
-            <Navbar />
-            <main>
-              <Routes>
-                {/* User Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/products" element={<AllProducts />} />
-                <Route path="/product/:id" element={<Product />} />
-                <Route path="/cart" element={<ShoppingCart />} />
-                <Route 
-                  path="/confirm-order" 
-                  element={
-                    <ProtectedRoute>
-                      <ConfirmOrder />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/order-history" 
-                  element={
-                    <ProtectedRoute>
-                      <OrderHistory />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/my-orders" 
-                  element={
-                    <ProtectedRoute>
-                      <MyOrders />
-                    </ProtectedRoute>
-                  } 
-                />
+          <Layout>
+            <Routes>
+              {/* User Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/products" element={<AllProducts />} />
+              <Route path="/product/:id" element={<Product />} />
+              <Route path="/cart" element={<ShoppingCart />} />
+              <Route 
+                path="/confirm-order" 
+                element={
+                  <ProtectedRoute>
+                    <ConfirmOrder />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/order-history" 
+                element={
+                  <ProtectedRoute>
+                    <OrderHistory />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/my-orders" 
+                element={
+                  <ProtectedRoute>
+                    <MyOrders />
+                  </ProtectedRoute>
+                } 
+              />
 
-                {/* Admin Routes */}
-                <Route 
-                  path="/admin" 
-                  element={
-                    <AdminRoute>
-                      <AdminHome />
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/add-product" 
-                  element={
-                    <AdminRoute>
-                      <AddProduct />
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin/orders" 
-                  element={
-                    <AdminRoute>
-                      <AdminOrders />
-                    </AdminRoute>
-                  } 
-                />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
+              {/* Admin Routes */}
+              <Route 
+                path="/admin" 
+                element={
+                  <AdminRoute>
+                    <AdminHome />
+                  </AdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/add-product" 
+                element={
+                  <AdminRoute>
+                    <AddProduct />
+                  </AdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/orders" 
+                element={
+                  <AdminRoute>
+                    <AdminOrders />
+                  </AdminRoute>
+                } 
+              />
+            </Routes>
+          </Layout>
         </Router>
       </CartProvider>
     </AuthProvider>

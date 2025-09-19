@@ -35,8 +35,8 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-8">
             <Link 
               to="/" 
-              className={`px-4 py-2 rounded transition-colors ${
-                isActive('/') ? 'bg-[#DDBB92] text-brown-800' : 'hover:text-[#2B2A29]'
+              className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
+              isActive('/') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
               }`}
             >
               Home
@@ -63,13 +63,11 @@ const Navbar = () => {
 
           {/* Center Logo */}
           <div className="absolute top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-            <Link to="/">
               <img 
                 src="Logo.png" 
                 alt="Glowy Logo" 
                 className="h-20 md:h-28 object-contain"
               />
-            </Link>
           </div>
 
           {/* Right Side Icons and Actions */}
@@ -77,7 +75,7 @@ const Navbar = () => {
             {/* Search Icon */}
             <Link
               to="/search"
-              className="inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:bg-[#e6c79b] transition-colors duration-300"
+              className="inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:bg-[#E3D2BD] transition-colors duration-300"
             >
               <Search className="w-5 h-5" />
             </Link>
@@ -86,7 +84,7 @@ const Navbar = () => {
             <div className="relative">
               <Link
                 to="/cart"
-                className="relative inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:bg-[#e6c79b] transition-colors duration-300"
+                className="relative inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:bg-[#E3D2BD] transition-colors duration-300"
               >
                 <ShoppingCart className="w-5 h-5" />
                   {getTotalItems() > 0 && (
@@ -132,7 +130,7 @@ const Navbar = () => {
             ) : (
               <Link 
                 to="/login" 
-                className="bg-[#DDBB92] text-[#2B2A29] px-6 py-2 rounded-lg font-semibold hover:bg-beige-400 transition-colors flex items-center space-x-2"
+                className="bg-[#DDBB92] text-[#2B2A29] px-6 py-2 rounded-lg font-semibold hover:bg-[#E3D2BD] transition-colors flex items-center space-x-2"
               >
                 <span>Login/Register</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

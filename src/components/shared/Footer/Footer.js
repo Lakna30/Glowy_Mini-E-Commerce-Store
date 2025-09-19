@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   return (
     <footer className="bg-black text-white">
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Left Column */}
-          <div className="space-y-4">
+          <div className="space-y-4 text-center">
             <Link to="/privacy" className="block text-gray-400 hover:text-white transition-colors">
               Privacy Policy
             </Link>
@@ -21,7 +21,7 @@ const Footer = () => {
           </div>
 
           {/* Center Column - Social Media Icons */}
-          <div className="flex justify-center">
+          <div className="flex justify-center mt-6">
             <div className="flex space-x-4">
               {/* Instagram Icon */}
               <a 
@@ -46,7 +46,7 @@ const Footer = () => {
           </div>
 
           {/* Right Column */}
-          <div className="space-y-4">
+          <div className="space-y-4 text-center">
             <Link to="/shipping" className="block text-gray-400 hover:text-white transition-colors">
               Shipping INF
             </Link>
@@ -60,7 +60,7 @@ const Footer = () => {
         </div>
 
         {/* Copyright Section */}
-        <div className="border-t border-gray-800 mt-8 pt-8">
+        <div className="border-t border-gray-800 mt-4 pt-3">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
               © 2024 Glowy. All rights reserved.
