@@ -1,123 +1,104 @@
 import React from 'react';
+import { ArrowRight } from 'lucide-react';
 
 const Home = () => {
   return (
     <div className="home min-h-screen">
       {/* Main Hero Section */}
-      <div className="bg-[#484139] min-h-screen flex items-center">
+      <div className="bg-[#484139] min-h-screen flex items-center justify-center relative">
         <div className="container mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            {/* Center Image */}
+            <div className="col-span-4 flex justify-center relative z-0">
+              <div className="relative">
+                  <img
+                    src="Hero.png"
+                    alt="Woman applying skincare"
+                    className="w-full h-full object-cover"
+                  />
+              </div>
+            </div>
             
             {/* Left Section - Text Content */}
-            <div className="text-white space-y-8">
-              {/* Sparkle Icons */}
-              <div className="flex items-center space-x-2 mb-4">
-                <svg className="w-6 h-6 text-beige-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-                <svg className="w-6 h-6 text-beige-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              </div>
+            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -mt-10 z-10 px-6 lg:px-12">
+              <div className="text-[#E3D5C5] space-y-8 max-w-md">
               
               {/* Main Headline */}
               <h1 className="text-5xl lg:text-6xl font-serif font-bold leading-tight">
-                Glow Beyond Limits
+                Glow Beyond
+                <br />
+                Limits
               </h1>
               
               {/* Description */}
-              <p className="text-lg lg:text-xl text-gray-300 leading-relaxed max-w-lg">
+              <p className="text-lg lg:text-xl text-[#E3D5C5] leading-relaxed max-w-lg">
                 Transform your skincare routine with our innovative solutions, crafted to bring out your natural beauty and deliver a luminous, healthy glow.
               </p>
               
               {/* CTA Button */}
-              <button className="bg-beige-500 text-brown-800 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-beige-400 transition-colors duration-300 flex items-center space-x-2">
+              <button className="bg-[#DDBB92] text-[#2B2A29] px-8 py-4 rounded-full font-serif font-semibold text-lg hover:bg-beige-400 transition-colors duration-300 flex items-center space-x-2">
                 <span>Explore more</span>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                <ArrowRight className="w-5 h-5 translate-y-1" />
               </button>
             </div>
-            
-            {/* Right Section - Image and Categories */}
-            <div className="relative">
-              {/* Main Image Container */}
-              <div className="relative">
-                {/* Beige Arch Background */}
-                <div className="absolute inset-0 bg-beige-500 rounded-full transform scale-110 opacity-90"></div>
-                
-                {/* Woman's Image */}
-                <div className="relative z-10 p-8">
-                  <img
-                    src="/woman-portrait.jpg"
-                    alt="Woman with glowing skin"
-                    className="w-full h-auto rounded-full object-cover shadow-2xl"
-                  />
-                </div>
-                
-                {/* Sparkle near woman's head */}
-                <div className="absolute top-8 left-8 z-20">
-                  <svg className="w-8 h-8 text-beige-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
+          </div>  
+
+            {/* Product Categories */}
+            <div className="absolute top-[40%] right-[15%] transform -translate-y-1/2 space-y-4 z-20">
+              {/* Hair Care */}
+              <div className="bg-[#484139] rounded-lg p-0 w-60 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <div className="w-20 h-20 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <img src="HairCareIcon.png"
+                           alt="Hair Care" 
+                           className="w-full h-full object-contain" />
+                  </div>
+                  <span className="font-serif font-semibold text-[#E3D5C5] text-lg">Hair Care</span>
                 </div>
               </div>
-              
-              {/* Product Categories */}
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 space-y-4">
-                {/* Hair Care */}
-                <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                    </div>
-                    <span className="font-semibold text-gray-800">Hair Care</span>
+
+              {/* Body Care */}
+              <div className="bg-[#484139] rounded-lg p-0 w-60 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <div className="w-20 h-20 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <img src="BodyCareIcon.png"
+                           alt="Body Care" 
+                           className="w-full h-full object-contain" />
                   </div>
+                  <span className="font-serif font-semibold text-[#E3D5C5] text-lg">Body Care</span>
                 </div>
-                
-                {/* Body Care */}
-                <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                    </div>
-                    <span className="font-semibold text-gray-800">Body Care</span>
+              </div>
+
+              {/* Facial Care */}
+              <div className="bg-[#484139] rounded-lg p-0 w-60 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <div className="w-20 h-20 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <img src="SunProtectionIcon.png"
+                           alt="Sun Protection" 
+                           className="w-full h-full object-contain" />
                   </div>
+                  <span className="font-serif font-semibold text-[#E3D5C5] text-lg">Sun Protection</span>
                 </div>
-                
-                {/* Facial Care */}
-                <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+              </div>
+
+              {/* Sun Protection */}
+                <div className="bg-[#484139] rounded-lg p-0 w-60 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
+                    <div className="w-20 h-20 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <img src="FacialCareIcon.png"
+                           alt="Facial Care" 
+                           className="w-full h-full object-contain" />
                     </div>
-                    <span className="font-semibold text-gray-800">Facial Care</span>
-                  </div>
-                </div>
-                
-                {/* Sun Protection */}
-                <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                      </svg>
-                    </div>
-                    <span className="font-semibold text-gray-800">Sun Protection</span>
+                    <span className="font-serif font-semibold text-[#E3D5C5] text-lg">Facial Care</span>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
