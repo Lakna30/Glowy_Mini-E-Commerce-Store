@@ -75,19 +75,25 @@ const Navbar = () => {
           {/* Right Side Icons and Actions */}
           <div className="hidden md:flex items-center space-x-6">
             {/* Search Icon */}
-            <button className="text-white hover:text-beige-300 transition-colors">
-              <Search className="w-6 h-6" />
-            </button>
+            <Link
+              to="/search"
+              className="inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:bg-[#e6c79b] transition-colors duration-300"
+            >
+              <Search className="w-5 h-5" />
+            </Link>
 
             {/* Cart Icon */}
             <div className="relative">
-              <Link to="/cart" className="text-white hover:text-beige-300 transition-colors relative">
-                <ShoppingCart className="w-6 h-6" />
-                {getTotalItems() > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-beige-500 text-brown-800 text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                  {getTotalItems()}
-                  </span>
-                )}
+              <Link
+                to="/cart"
+                className="relative inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:bg-[#e6c79b] transition-colors duration-300"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                  {getTotalItems() > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-beige-500 text-brown-800 text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                      {getTotalItems()}
+                    </span>
+                  )}
               </Link>
             </div>
 
