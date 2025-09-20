@@ -33,18 +33,21 @@ const Login = () => {
       {/* Left Side - Login Form */}
       <div className="flex-1 flex flex-col justify-center px-12 lg:px-16" style={{ backgroundColor: "#484139" }}>
         {/* Logo */}
-        <div className="mb-16">
+        <div className="mb-16 mt-2">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#d4b998" }}></div>
-            <h1 className="text-2xl font-light text-white tracking-wide">glowy</h1>
+            <img 
+                src="Logo.png" 
+                alt="Glowy Logo" 
+                className="h-16 md:h-20 object-contain"
+              />
           </div>
         </div>
 
         {/* Welcome Section */}
-        <div className="max-w-md">
-          <h2 className="text-4xl lg:text-5xl font-serif text-white mb-6 leading-tight">Welcome Back!</h2>
+        <div className="max-w-md -mt-12">
+          <h2 className="text-4xl lg:text-5xl font-serif font-bold text-[#E3D5C5] mb-6 leading-tight">Welcome Back!</h2>
 
-          <p className="text-white/80 text-base leading-relaxed mb-12">
+          <p className="text-[#E3D5C5]/80 text-base leading-relaxed mb-12">
             Access your account to track orders, view your wishlist, and enjoy exclusive offers. Don't have an account
             yet? Sign up today for a seamless shopping experience!
           </p>
@@ -138,22 +141,23 @@ const Login = () => {
 
       {/* Right Side - Hero Image */}
       <div className="flex-1 relative">
-        <div className="h-full rounded-l-3xl overflow-hidden" style={{ backgroundColor: "#d4b998" }}>
+        <div className="rounded-l-3xl overflow-hidden mx-auto my-auto max-w-[600px] max-h-[800px]" style={{ backgroundColor: "#d4b998" }}>
           <div className="relative h-full flex flex-col">
             {/* Main Image */}
-            <div className="flex-1 flex items-center justify-center p-8">
+            <div className="flex-1 flex items-center justify-center p-16">
               <img
-                src="/asian-woman-in-white-clothing-applying-skincare-wi.jpg"
+                src="LoginPic.png"
                 alt="Woman applying skincare"
-                className="max-w-full max-h-full object-contain"
+                className="max-w-full max-h-full object-contain -mt-8"
               />
             </div>
 
             {/* Quote Section */}
-            <div className="p-8">
-              <div className="rounded-2xl p-6 text-center" style={{ backgroundColor: "#fae7f5" }}>
-                <p className="text-gray-700 text-lg italic font-light leading-relaxed">
-                  " Beautiful skin starts with self-care—nourish it, and let your inner glow shine through "
+            <div className="p-4 -mt-20">
+              <div className="rounded-2xl p-6 text-center" style={{ backgroundColor: "#FAE7F5" }}>
+                <p style={{ fontFamily: "'Source Serif Pro', serif" }}
+                            className="text-[#463C30] text-2xl italic font-light leading-relaxed">
+                            " Beautiful skin starts with self-care—nourish it, and let your inner glow shine through "
                 </p>
               </div>
             </div>
