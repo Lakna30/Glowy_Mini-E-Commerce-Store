@@ -37,7 +37,7 @@ const Home = () => {
               </p>
               
               {/* CTA Button */}
-              <button className="bg-[#DDBB92] text-[#2B2A29] px-8 py-4 rounded-full font-serif font-semibold text-lg hover:bg-[#E3D2BD] transition-colors duration-300 flex items-center space-x-2">
+              <button className="bg-[#DDBB92] text-[#2B2A29] px-8 py-4 rounded-full font-serif font-semibold text-lg hover:opacity-90 transition-colors duration-300 flex items-center space-x-2">
                 <span>Explore more</span>
                 <ArrowRight className="w-5 h-5 translate-y-1" />
               </button>

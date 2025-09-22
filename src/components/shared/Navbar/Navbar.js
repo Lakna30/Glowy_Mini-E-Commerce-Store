@@ -75,7 +75,7 @@ const Navbar = () => {
             {/* Search Icon */}
             <Link
               to="/search"
-              className="inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:bg-[#E3D2BD] transition-colors duration-300"
+              className="inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:opacity-90 transition-colors duration-300"
             >
               <Search className="w-5 h-5" />
             </Link>
@@ -84,7 +84,7 @@ const Navbar = () => {
             <div className="relative">
               <Link
                 to="/cart"
-                className="relative inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:bg-[#E3D2BD] transition-colors duration-300"
+                className="relative inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:opacity-90 transition-colors duration-300"
               >
                 <ShoppingCart className="w-5 h-5" />
                   {getTotalItems() > 0 && (
@@ -130,7 +130,7 @@ const Navbar = () => {
             ) : (
               <Link 
                 to="/login" 
-                className="bg-[#DDBB92] text-[#2B2A29] px-6 py-2 rounded-lg font-semibold hover:bg-[#E3D2BD] transition-colors flex items-center space-x-2"
+                className="bg-[#DDBB92] text-[#2B2A29] px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-colors flex items-center space-x-2"
               >
                 <span>Login/Register</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
