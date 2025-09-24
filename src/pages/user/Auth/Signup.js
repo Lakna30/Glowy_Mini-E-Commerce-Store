@@ -56,7 +56,7 @@ const Signup = () => {
       <div className="flex-1 flex flex-col justify-center px-12 lg:px-20">
         
         {/* Logo */}
-        <div className="mb-10">
+        <div className="mb-10 mt-12">
           <img src="Logo.png" alt="Glowy Logo" className="h-14 object-contain" />
         </div>
 
@@ -131,7 +131,7 @@ const Signup = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
@@ -158,20 +158,22 @@ const Signup = () => {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600"
                   >
-                    {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
 
               {/* Signup Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 flex items-center justify-center rounded-full font-medium text-gray-900 hover:opacity-90 transition"
-                style={{ backgroundColor: "#e0c4a3" }}
-              >
-                {loading ? "Creating Account..." : "Signup"} <ArrowRight className="ml-2 w-5 h-5" />
-              </button>
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-12 flex items-center justify-center rounded-full font-medium text-gray-900 hover:opacity-90 transition"
+                  style={{ backgroundColor: "#e0c4a3" }}
+                >
+                  {loading ? "Creating Account..." : "Signup"} <ArrowRight className="ml-2 w-5 h-5" />
+                </button>
+              </div>
             </form>
 
             {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
@@ -180,7 +182,7 @@ const Signup = () => {
             <div className="text-center text-white/70 text-sm my-6">-OR-</div>
 
             {/* Social Login */}
-            <div className="flex justify-center gap-4 mb-8">
+            <div className="flex justify-center gap-4 mb-4">
               {/* Google */}
               <button className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-gray-50 transition-colors">
                 <svg className="w-6 h-6" viewBox="0 0 24 24">
@@ -216,23 +218,23 @@ const Signup = () => {
 
         {/* Right Side */}
       <div className="flex items-center justify-center p-8 lg:pr-20">
-        <div className="bg-[#e0c4a3] rounded-3xl p-6 shadow-lg w-[540px]">
+        <div className="bg-[#e0c4a3] rounded-3xl p-6 shadow-lg w-[600px]">
           <div className="relative flex flex-col items-center">
             {/* Image */}
             <img 
-              src="LoginPic.png" 
+              src="SignUpPic.png" 
               alt="Skincare" 
               className="object-contain w-full h-auto rounded-xl mb-8"
-              style={{ height: '540px', width: 'auto' }}
+              style={{ height: '600px', width: 'auto' }}
             />
 
             {/* Quote Overlapping */}
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 translate-y-6 bg-[#fce9f5] rounded-xl p-4 shadow-md w-[90%]">
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 translate-y-6 bg-[#fce9f5] rounded-xl p-4 shadow-md w-[100%]">
               <p 
                 style={{ fontFamily: "'Source Serif Pro', serif" }} 
                 className="text-[#463C30] text-xl italic font-light leading-relaxed text-center"
               >
-                “ Beautiful skin starts with self-care—nourish it, and let your inner glow shine through “
+                “ Radiant skin reflects the care you invest in yourself. Nourish it, and let your natural beauty shine “
               </p>
             </div>
           </div>
