@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
-import {
-  Sparkles,
-  X
-} from "lucide-react";
+import { X } from "lucide-react";
 
 const AllProducts = () => {
   // 🔹 State
@@ -14,6 +11,7 @@ const AllProducts = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [appliedFilters, setAppliedFilters] = useState([]);
   const [sortBy, setSortBy] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
 
   // 🔹 Filter categories
   const filterCategories = [
@@ -21,17 +19,25 @@ const AllProducts = () => {
     "Retinols", "Facial Oil", "Sunscreen", "Eye Care"
   ];
 
-  // 🔹 Dummy Data (fallback if Firestore empty)
-  const dummyProducts = [
-    { id: 1, name: "Cleanser", price: 2300, image: "/luxury-skincare-cleanser-bottle.jpg", category: "Cleansers" },
-    { id: 2, name: "Cleanser", price: 2050, image: "/blue-skincare-tube-cleanser.jpg", category: "Cleansers" },
-    { id: 3, name: "Cleanser", price: 2650, image: "/green-skincare-cleanser-in-hands.jpg", category: "Cleansers" },
-    { id: 4, name: "Moisturizer", price: 3200, image: "/white-jar-moisturizer-cream.jpg", category: "Facial Oil" },
-    { id: 5, name: "Serum Set", price: 4500, image: "/yellow-serum-bottles-skincare-set.jpg", category: "Toners" },
-    { id: 6, name: "Sunscreen", price: 2800, image: "/blue-sunscreen-tube-beach.jpg", category: "Sunscreen" }
+  // 🔹 Top Category Bar
+  const topCategories = [
+    { name: "Hair Care", key: "Hair Care" },
+    { name: "Body Care", key: "Body Care" },
+    { name: "Facial Care", key: "Facial Care" },
+    { name: "Sun Protection", key: "Sunscreen" }
   ];
 
-  // 🔹 Fetch products from Firestore OR use dummy
+  // 🔹 Dummy Data
+  const dummyProducts = [
+    { id: 1, name: "Cleanser", price: 2300, image: "/luxury-skincare-cleanser-bottle.jpg", category: "Cleansers", topCategory: "Facial Care" },
+    { id: 2, name: "Cleanser", price: 2050, image: "/blue-skincare-tube-cleanser.jpg", category: "Cleansers", topCategory: "Facial Care" },
+    { id: 3, name: "Cleanser", price: 2650, image: "/green-skincare-cleanser-in-hands.jpg", category: "Cleansers", topCategory: "Facial Care" },
+    { id: 4, name: "Moisturizer", price: 3200, image: "/white-jar-moisturizer-cream.jpg", category: "Facial Oil", topCategory: "Facial Care" },
+    { id: 5, name: "Serum Set", price: 4500, image: "/yellow-serum-bottles-skincare-set.jpg", category: "Toners", topCategory: "Facial Care" },
+    { id: 6, name: "Sunscreen", price: 2800, image: "/blue-sunscreen-tube-beach.jpg", category: "Sunscreen", topCategory: "Sun Protection" }
+  ];
+
+  // 🔹 Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -42,8 +48,7 @@ const AllProducts = () => {
           ...doc.data()
         }));
 
-        // If no products in Firestore, use dummy
-        if (productsData.length === 0) {
+        if (!productsData || productsData.length === 0) {
           productsData = dummyProducts;
         }
 
@@ -51,7 +56,6 @@ const AllProducts = () => {
         setFilteredProducts(productsData);
       } catch (error) {
         console.error('Error fetching products:', error);
-        // fallback to dummy
         setProducts(dummyProducts);
         setFilteredProducts(dummyProducts);
       } finally {
@@ -74,29 +78,29 @@ const AllProducts = () => {
       );
     }
 
-    // Category filter
+    // Sidebar Category filter
     if (appliedFilters.length > 0) {
       filtered = filtered.filter(product => appliedFilters.includes(product.category));
+    }
+
+    // Top Category Bar filter
+    if (activeCategory !== "All") {
+      filtered = filtered.filter(product => product.topCategory === activeCategory);
     }
 
     // Sorting
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'a-z':
-          return a.name.localeCompare(b.name);
-        case 'z-a':
-          return b.name.localeCompare(a.name);
-        case 'price-low':
-          return a.price - b.price;
-        case 'price-high':
-          return b.price - a.price;
-        default:
-          return 0;
+        case 'a-z': return a.name.localeCompare(b.name);
+        case 'z-a': return b.name.localeCompare(a.name);
+        case 'price-low': return a.price - b.price;
+        case 'price-high': return b.price - a.price;
+        default: return 0;
       }
     });
 
     setFilteredProducts(filtered);
-  }, [products, searchTerm, appliedFilters, sortBy]);
+  }, [products, searchTerm, appliedFilters, sortBy, activeCategory]);
 
   if (loading) {
     return (
@@ -109,21 +113,57 @@ const AllProducts = () => {
   }
 
   return (
-    <div className="all-products">
+    <div className="all-products bg-[#484139]">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-4">All Products</h1>
 
         {/* Hero Section */}
         <section className="px-6 py-16">
           <div className="max-w-7xl mx-auto">
-            <div className="bg-[#e3d5c5] rounded-3xl px-12 py-16 text-center relative overflow-hidden">
-              <Sparkles className="absolute top-8 left-16 h-6 w-6 text-[#927b5e] opacity-60" />
-              <Sparkles className="absolute bottom-12 right-20 h-4 w-4 text-[#927b5e] opacity-40" />
-              <h1 className="text-5xl font-bold text-[#463c30] mb-6">Elevate Your Routine</h1>
-              <p className="text-lg text-[#927b5e] max-w-4xl mx-auto">
-                Explore our carefully curated collection of beauty and wellness products...
+            <div className="bg-[#D4B998] rounded-3xl px-12 py-16 text-center relative overflow-hidden">
+              <h1 className="text-5xl font-serif font-bold text-[#463c30] mb-6">Elevate Your Routine</h1>
+              <p className="text-lg text-[#463C30] max-w-4xl mx-auto">
+                Explore our carefully curated collection of beauty and wellness products designed to nourish, protect, and enhance. 
+                From skincare essentials to hair care and body care, find everything you need to elevate your routine and achieve your best look yet.
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* Top Category Bar - Horizontal with Icons */}
+        <section className="px-6 mb-12">
+          <div className="w-full px-8 flex justify-center gap-6 flex-wrap">
+          {topCategories.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => setActiveCategory(cat.key)}
+              className={`flex items-center space-x-3 bg-[#D4B998] rounded-2xl px-6 py-4 min-w-[19rem] shadow-md transition-transform duration-300 cursor-pointer
+              hover:scale-105 hover:shadow-2xl
+              ${activeCategory === cat.key ? "scale-105 shadow-2xl bg-[#3c352d] text-white" : "text-[#463C30]"}`
+              }
+            >
+              {/* Icon */}
+              <div className="w-16 h-16 bg-purple-100 rounded-3xl flex items-center justify-center">
+                <img
+                  src={
+                  cat.key === "Hair Care"
+                  ? "HairCareIcon.png"
+                  : cat.key === "Body Care"
+                  ? "BodyCareIcon.png"
+                  : cat.key === "Facial Care"
+                  ? "FacialCareIcon.png"
+                  : "SunProtectionIcon.png"
+                  }
+                  alt={cat.name}
+                  className="w-full h-full object-cover rounded-3xl"
+                />
+              </div>
+
+              {/* Label */}
+              <span className="font-serif font-semibold text-lg">
+                {cat.name}
+              </span>
+            </button>
+            ))}
           </div>
         </section>
 
@@ -220,28 +260,32 @@ const AllProducts = () => {
               </div>
 
               {/* Product Grid */}
-              <div className="lg:col-span-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredProducts.map((product) => (
-                    <div key={product.id} className="bg-white rounded-2xl shadow-sm">
-                      <div className="aspect-square bg-gray-100 p-4">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-full object-cover rounded-xl"
-                        />
+              {filteredProducts.length === 0 ? (
+                <p className="text-center text-white">No products found.</p>
+              ) : (
+                <div className="lg:col-span-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProducts.map((product) => (
+                      <div key={product.id} className="bg-white rounded-2xl shadow-sm">
+                        <div className="aspect-square bg-gray-100 p-4">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover rounded-xl"
+                          />
+                        </div>
+                        <div className="p-6">
+                          <h3 className="text-[#463c30] font-medium text-lg mb-1">{product.name}</h3>
+                          <p className="text-[#927b5e] text-lg font-semibold mb-4">LKR {product.price}</p>
+                          <button className="w-full bg-[#d4b998] text-[#463c30] hover:bg-[#ddbb92] rounded-full font-medium py-2">
+                            Add to cart
+                          </button>
+                        </div>
                       </div>
-                      <div className="p-6">
-                        <h3 className="text-[#463c30] font-medium text-lg mb-1">{product.name}</h3>
-                        <p className="text-[#927b5e] text-lg font-semibold mb-4">LKR {product.price}</p>
-                        <button className="w-full bg-[#d4b998] text-[#463c30] hover:bg-[#ddbb92] rounded-full font-medium py-2">
-                          Add to cart
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </section>
