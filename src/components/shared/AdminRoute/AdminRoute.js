@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 
 const AdminRoute = ({ children }) => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading, role } = useAuth();
 
   if (loading) {
     return (
@@ -16,8 +16,8 @@ const AdminRoute = ({ children }) => {
     );
   }
 
-  // Simple admin check - you might want to implement a more robust role-based system
-  const isAdmin = currentUser?.email === 'admin@glowy.com';
+  // Role-based check
+  const isAdmin = role === 'admin';
 
   if (!currentUser) {
     return <Navigate to="/login" replace />;

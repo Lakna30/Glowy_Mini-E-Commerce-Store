@@ -7,16 +7,29 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const { login, googleSignIn, role } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await login(email, password);
-      navigate('/');
+      alert('Logged in successfully.');
+      navigate(role === 'admin' ? '/admin' : '/');
     } catch (error) {
       console.error('Login error:', error);
+      alert('Login failed. Please check your credentials.');
+    }
+  };
+
+  const handleGoogle = async () => {
+    try {
+      await googleSignIn();
+      alert('Signed in with Google successfully.');
+      navigate(role === 'admin' ? '/admin' : '/');
+    } catch (error) {
+      console.error('Google sign-in error:', error);
+      alert('Google sign-in failed. Please try again.');
     }
   };
 
@@ -92,9 +105,8 @@ const Login = () => {
           <div className="text-center text-white/70 text-sm my-6">-OR-</div>
 
           {/* Social Login */}
-          {/* Social Login */}
           <div className="flex justify-center gap-4 mb-8">
-            <button className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-gray-50 transition-colors">
+            <button onClick={handleGoogle} className="w-12 h-12 rounded-full bg-white flex items-center justify-center hover:bg-gray-50 transition-colors">
               <svg className="w-6 h-6" viewBox="0 0 24 24">
                 <path
                   fill="#4285F4"

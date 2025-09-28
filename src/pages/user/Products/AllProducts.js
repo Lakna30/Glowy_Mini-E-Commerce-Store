@@ -174,9 +174,9 @@ const AllProducts = () => {
               
               {/* Sidebar Filter */}
               <div className="lg:col-span-1">
-                <div className="bg-[#d4b998] rounded-2xl p-6 h-fit">
+                <div className="bg-[#D4B998] rounded-2xl p-6 h-fit">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-semibold text-[#463c30]">Filter</h3>
+                    <h3 className="text-xl font-semibold text-[#463C30]">Filter</h3>
                     <button
                       onClick={() => setAppliedFilters([])}
                       className="text-sm text-[#927b5e] hover:text-[#463c30]"
@@ -276,7 +276,7 @@ const AllProducts = () => {
                         </div>
                         <div className="p-6">
                           <h3 className="text-[#463c30] font-medium text-lg mb-1">{product.name}</h3>
-                          <p className="text-[#927b5e] text-lg font-semibold mb-4">LKR {product.price}</p>
+                          <p className="text-[#463c30] text-lg font-semibold mb-4">LKR {product.price}</p>
                           <button className="w-full bg-[#d4b998] text-[#463c30] hover:bg-[#ddbb92] rounded-full font-medium py-2">
                             Add to cart
                           </button>
