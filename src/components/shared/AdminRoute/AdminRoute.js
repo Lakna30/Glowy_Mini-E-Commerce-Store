@@ -1,9 +1,14 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { isAdminEmail } from '../../../constants/admin';
 
 const AdminRoute = ({ children }) => {
   const { currentUser, loading, role } = useAuth();
+
+  console.log('AdminRoute - currentUser:', currentUser?.email);
+  console.log('AdminRoute - role:', role);
+  console.log('AdminRoute - loading:', loading);
 
   if (loading) {
     return (
@@ -16,17 +21,23 @@ const AdminRoute = ({ children }) => {
     );
   }
 
-  // Role-based check
-  const isAdmin = role === 'admin';
+  // Role-based check - check both role and email for immediate admin detection
+  const isAdmin = role === 'admin' || (currentUser?.email && isAdminEmail(currentUser.email));
+  console.log('AdminRoute - isAdmin:', isAdmin);
+  console.log('AdminRoute - role check:', role === 'admin');
+  console.log('AdminRoute - email check:', currentUser?.email && isAdminEmail(currentUser.email));
 
   if (!currentUser) {
+    console.log('AdminRoute - No current user, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   if (!isAdmin) {
+    console.log('AdminRoute - Not admin, redirecting to home');
     return <Navigate to="/" replace />;
   }
 
+  console.log('AdminRoute - Admin access granted');
   return children;
 };
 

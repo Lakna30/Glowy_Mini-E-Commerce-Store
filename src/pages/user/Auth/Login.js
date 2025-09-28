@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { isAdminEmail } from '../../../constants/admin';
 import { Eye, EyeOff, Mail, ArrowRight} from "lucide-react";
 
 const Login = () => {
@@ -14,8 +15,13 @@ const Login = () => {
     e.preventDefault();
     try {
       await login(email, password);
+      console.log('Login successful, email:', email);
+      console.log('Is admin email:', isAdminEmail(email));
       alert('Logged in successfully.');
-      navigate(role === 'admin' ? '/admin' : '/');
+      // Check if email is admin email for immediate redirect
+      const redirectPath = isAdminEmail(email) ? '/admin' : '/';
+      console.log('Redirecting to:', redirectPath);
+      navigate(redirectPath);
     } catch (error) {
       console.error('Login error:', error);
       alert('Login failed. Please check your credentials.');
@@ -24,9 +30,10 @@ const Login = () => {
 
   const handleGoogle = async () => {
     try {
-      await googleSignIn();
+      const user = await googleSignIn();
       alert('Signed in with Google successfully.');
-      navigate(role === 'admin' ? '/admin' : '/');
+      // Check if email is admin email for immediate redirect
+      navigate(isAdminEmail(user?.email) ? '/admin' : '/');
     } catch (error) {
       console.error('Google sign-in error:', error);
       alert('Google sign-in failed. Please try again.');

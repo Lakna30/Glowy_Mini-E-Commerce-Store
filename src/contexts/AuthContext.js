@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
+import { ADMIN_EMAILS } from '../constants/admin';
 
 const AuthContext = createContext();
 
@@ -21,8 +22,6 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState(null);
-
-  const ADMIN_EMAILS = ['admin@gmail.com'];
 
   // 🔹 SIGNUP
     async function signup(email, password, additionalData = {}) {
@@ -150,15 +149,24 @@ export function AuthProvider({ children }) {
 
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
+        console.log('AuthContext - User email:', user.email);
+        console.log('AuthContext - User doc exists:', userDoc.exists());
         if (userDoc.exists()) {
           const data = userDoc.data();
-          setRole(data.role || (ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user'));
+          console.log('AuthContext - User doc data:', data);
+          const finalRole = data.role || (ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user');
+          console.log('AuthContext - Setting role to:', finalRole);
+          setRole(finalRole);
         } else {
-          setRole(ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user');
+          const finalRole = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user';
+          console.log('AuthContext - No user doc, setting role to:', finalRole);
+          setRole(finalRole);
         }
       } catch (error) {
         console.warn('Failed to fetch role:', error);
-        setRole(ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user');
+        const finalRole = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user';
+        console.log('AuthContext - Error case, setting role to:', finalRole);
+        setRole(finalRole);
       } finally {
         setLoading(false);
       }

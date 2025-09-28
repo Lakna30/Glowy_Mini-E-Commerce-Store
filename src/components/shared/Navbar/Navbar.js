@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useCart } from '../../../contexts/CartContext';
+import { isAdminEmail } from '../../../constants/admin';
 import { Search, ShoppingCart } from 'lucide-react';
 
 const Navbar = () => {
@@ -20,7 +21,7 @@ const Navbar = () => {
     }
   };
 
-  const isAdmin = currentUser?.email === 'admin@glowy.com';
+  const isAdmin = currentUser?.email && isAdminEmail(currentUser.email);
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -33,32 +34,73 @@ const Navbar = () => {
           
           {/* Left Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/" 
-              className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
-              isActive('/') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
-              }`}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/about" 
-              className="hover:text-beige-300 transition-colors"
-            >
-              About
-            </Link>
-            <Link 
-              to="/products" 
-              className="hover:text-beige-300 transition-colors"
-            >
-              Products
-            </Link>
-            <Link 
-              to="/contact" 
-              className="hover:text-beige-300 transition-colors"
-            >
-              Contact us
-            </Link>
+            {isAdmin ? (
+              // Admin Navigation
+              <>
+                <Link 
+                  to="/admin" 
+                  className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
+                    isActive('/admin') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                  }`}
+                >
+                  Dashboard
+                </Link>
+                <Link 
+                  to="/admin/add-product" 
+                  className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
+                    isActive('/admin/add-product') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                  }`}
+                >
+                  Products
+                </Link>
+                <Link 
+                  to="/admin/orders" 
+                  className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
+                    isActive('/admin/orders') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                  }`}
+                >
+                  Orders
+                </Link>
+                <Link 
+                  to="/admin/reviews" 
+                  className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
+                    isActive('/admin/reviews') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                  }`}
+                >
+                  Reviews
+                </Link>
+              </>
+            ) : (
+              // Regular User Navigation
+              <>
+                <Link 
+                  to="/" 
+                  className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
+                    isActive('/') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                  }`}
+                >
+                  Home
+                </Link>
+                <Link 
+                  to="/about" 
+                  className="hover:text-beige-300 transition-colors"
+                >
+                  About
+                </Link>
+                <Link 
+                  to="/products" 
+                  className="hover:text-beige-300 transition-colors"
+                >
+                  Products
+                </Link>
+                <Link 
+                  to="/contact" 
+                  className="hover:text-beige-300 transition-colors"
+                >
+                  Contact us
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Center Logo */}
@@ -72,28 +114,33 @@ const Navbar = () => {
 
           {/* Right Side Icons and Actions */}
           <div className="hidden md:flex items-center space-x-6">
-            {/* Search Icon */}
-            <Link
-              to="/search"
-              className="inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:opacity-90 transition-colors duration-300"
-            >
-              <Search className="w-5 h-5" />
-            </Link>
+            {/* Search and Cart Icons - Only show for regular users */}
+            {!isAdmin && (
+              <>
+                {/* Search Icon */}
+                <Link
+                  to="/search"
+                  className="inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:opacity-90 transition-colors duration-300"
+                >
+                  <Search className="w-5 h-5" />
+                </Link>
 
-            {/* Cart Icon */}
-            <div className="relative">
-              <Link
-                to="/cart"
-                className="relative inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:opacity-90 transition-colors duration-300"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                  {getTotalItems() > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-beige-500 text-brown-800 text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                      {getTotalItems()}
-                    </span>
-                  )}
-              </Link>
-            </div>
+                {/* Cart Icon */}
+                <div className="relative">
+                  <Link
+                    to="/cart"
+                    className="relative inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:opacity-90 transition-colors duration-300"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                      {getTotalItems() > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-beige-500 text-brown-800 text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                          {getTotalItems()}
+                        </span>
+                      )}
+                  </Link>
+                </div>
+              </>
+            )}
 
             {/* Login/Register Button */}
               {currentUser ? ( 
@@ -161,46 +208,95 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-brown-700">
             <div className="flex flex-col space-y-4">
-              <Link 
-                to="/" 
-                className={`px-4 py-2 rounded transition-colors ${
-                  isActive('/') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link 
-                to="/about" 
-                className="hover:text-beige-300 transition-colors px-4 py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
-              </Link>
-              <Link 
-                to="/products" 
-                className="hover:text-beige-300 transition-colors px-4 py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Products
-              </Link>
-              <Link 
-                to="/contact" 
-                className="hover:text-beige-300 transition-colors px-4 py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact us
-              </Link>
-              
-              <div className="border-t border-brown-700 pt-4 mt-4">
-                <div className="flex items-center justify-between px-4 py-2">
-                  <Link to="/cart" className="flex items-center text-white hover:text-beige-300 transition-colors">
-                    <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-                    </svg>
-                    Cart ({getTotalItems()})
+              {isAdmin ? (
+                // Admin Mobile Navigation
+                <>
+                  <Link 
+                    to="/admin" 
+                    className={`px-4 py-2 rounded transition-colors ${
+                      isActive('/admin') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard
                   </Link>
+                  <Link 
+                    to="/admin/add-product" 
+                    className={`px-4 py-2 rounded transition-colors ${
+                      isActive('/admin/add-product') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Products
+                  </Link>
+                  <Link 
+                    to="/admin/orders" 
+                    className={`px-4 py-2 rounded transition-colors ${
+                      isActive('/admin/orders') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Orders
+                  </Link>
+                  <Link 
+                    to="/admin/reviews" 
+                    className={`px-4 py-2 rounded transition-colors ${
+                      isActive('/admin/reviews') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Reviews
+                  </Link>
+                </>
+              ) : (
+                // Regular User Mobile Navigation
+                <>
+                  <Link 
+                    to="/" 
+                    className={`px-4 py-2 rounded transition-colors ${
+                      isActive('/') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Home
+                  </Link>
+                  <Link 
+                    to="/about" 
+                    className="hover:text-beige-300 transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    About
+                  </Link>
+                  <Link 
+                    to="/products" 
+                    className="hover:text-beige-300 transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Products
+                  </Link>
+                  <Link 
+                    to="/contact" 
+                    className="hover:text-beige-300 transition-colors px-4 py-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Contact us
+                  </Link>
+                </>
+              )}
+              
+              {/* Cart section - Only show for regular users */}
+              {!isAdmin && (
+                <div className="border-t border-brown-700 pt-4 mt-4">
+                  <div className="flex items-center justify-between px-4 py-2">
+                    <Link to="/cart" className="flex items-center text-white hover:text-beige-300 transition-colors">
+                      <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                      </svg>
+                      Cart ({getTotalItems()})
+                    </Link>
+                  </div>
                 </div>
+              )}
                 
                 {currentUser ? (
                   <div className="px-4 py-2 space-y-2">
@@ -241,7 +337,6 @@ const Navbar = () => {
                 )}
               </div>
             </div>
-          </div>
         )}
     </nav>
     </div>
