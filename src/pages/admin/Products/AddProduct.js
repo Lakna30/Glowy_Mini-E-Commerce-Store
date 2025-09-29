@@ -11,69 +11,48 @@ const AddProduct = () => {
     originalPrice: '',
     category: '',
     brand: '',
-    stock: '',
-    sku: '',
-    weight: '',
-    dimensions: {
-      length: '',
-      width: '',
-      height: ''
-    },
-    colors: [],
-    sizes: [],
-    features: [],
-    tags: []
+    size: { type: '', ml: '' }   // ✅ single size object
   });
-  
+
   const [images, setImages] = useState([]);
-  const [imageUrls, setImageUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // handle text/select inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-
-  const handleArrayChange = (field, value) => {
-    const items = value.split(',').map(item => item.trim()).filter(item => item);
     setFormData(prev => ({
       ...prev,
-      [field]: items
+      [name]: value
     }));
   };
 
+  // handle size input
+  const handleSizeChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      size: { ...prev.size, [field]: value }
+    }));
+  };
+
+  // handle image upload
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     setImages(files);
   };
 
+  // upload images to Firebase Storage
   const uploadImages = async () => {
     const uploadPromises = images.map(async (image) => {
       const imageRef = ref(storage, `products/${Date.now()}_${image.name}`);
       const snapshot = await uploadBytes(imageRef, image);
       return getDownloadURL(snapshot.ref);
     });
-    
     return Promise.all(uploadPromises);
   };
 
+  // submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -81,23 +60,18 @@ const AddProduct = () => {
     setSuccess('');
 
     try {
-      // Upload images
       let uploadedImageUrls = [];
       if (images.length > 0) {
         uploadedImageUrls = await uploadImages();
       }
 
-      // Prepare product data
       const productData = {
         ...formData,
         price: parseFloat(formData.price),
         originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-        stock: parseInt(formData.stock),
-        weight: parseFloat(formData.weight),
-        dimensions: {
-          length: parseFloat(formData.dimensions.length),
-          width: parseFloat(formData.dimensions.width),
-          height: parseFloat(formData.dimensions.height)
+        size: {
+          type: formData.size.type,
+          ml: formData.size.ml ? parseInt(formData.size.ml, 10) : null   // ✅ ensure number
         },
         images: uploadedImageUrls,
         createdAt: serverTimestamp(),
@@ -105,12 +79,10 @@ const AddProduct = () => {
         isActive: true
       };
 
-      // Add product to Firestore
       const docRef = await addDoc(collection(db, 'products'), productData);
-      
       setSuccess(`Product added successfully with ID: ${docRef.id}`);
-      
-      // Reset form
+
+      // reset form
       setFormData({
         name: '',
         description: '',
@@ -118,21 +90,9 @@ const AddProduct = () => {
         originalPrice: '',
         category: '',
         brand: '',
-        stock: '',
-        sku: '',
-        weight: '',
-        dimensions: {
-          length: '',
-          width: '',
-          height: ''
-        },
-        colors: [],
-        sizes: [],
-        features: [],
-        tags: []
+        size: { type: '', ml: '' }
       });
       setImages([]);
-      setImageUrls([]);
 
     } catch (error) {
       console.error('Error adding product:', error);
@@ -143,9 +103,9 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="add-product">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
+    <div className="add-product flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="container max-w-4xl mx-auto px-6 py-8 bg-white shadow-lg rounded-lg">
+        <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Add New Product</h1>
           <p className="text-gray-600">Add a new product to your store</p>
         </div>
@@ -162,12 +122,13 @@ const AddProduct = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Basic Information */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Basic Information */}
             <div className="space-y-6">
               <h2 className="text-xl font-semibold">Basic Information</h2>
-              
+
+              {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Product Name *
@@ -182,6 +143,7 @@ const AddProduct = () => {
                 />
               </div>
 
+              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description *
@@ -196,6 +158,7 @@ const AddProduct = () => {
                 />
               </div>
 
+              {/* Price */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -226,6 +189,7 @@ const AddProduct = () => {
                 </div>
               </div>
 
+              {/* Category and Brand */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -239,12 +203,10 @@ const AddProduct = () => {
                     onChange={handleChange}
                   >
                     <option value="">Select Category</option>
-                    <option value="electronics">Electronics</option>
-                    <option value="fashion">Fashion</option>
-                    <option value="home">Home & Garden</option>
-                    <option value="sports">Sports</option>
-                    <option value="books">Books</option>
-                    <option value="toys">Toys</option>
+                    <option value="hair">Hair Care</option>
+                    <option value="body">Body Care</option>
+                    <option value="face">Facial Care</option>
+                    <option value="sun">Sun Protection</option>
                   </select>
                 </div>
                 <div>
@@ -261,136 +223,33 @@ const AddProduct = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Stock Quantity *
-                  </label>
-                  <input
-                    type="number"
-                    name="stock"
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    value={formData.stock}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    SKU
-                  </label>
-                  <input
-                    type="text"
-                    name="sku"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    value={formData.sku}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Additional Information */}
-            <div className="space-y-6">
-              <h2 className="text-xl font-semibold">Additional Information</h2>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  name="weight"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  value={formData.weight}
-                  onChange={handleChange}
-                />
-              </div>
-
+              {/* Size with ml */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dimensions (cm)
+                  Size
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="flex items-center space-x-3 mb-3">
+                  <select
+                    value={formData.size.type}
+                    onChange={(e) => handleSizeChange('type', e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="">Select Size</option>
+                    <option value="Travel/Trial">Travel/Trial</option>
+                    <option value="Standard">Standard</option>
+                    <option value="Larger">Larger</option>
+                  </select>
                   <input
                     type="number"
-                    step="0.01"
-                    name="dimensions.length"
-                    placeholder="Length"
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    value={formData.dimensions.length}
-                    onChange={handleChange}
-                  />
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="dimensions.width"
-                    placeholder="Width"
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    value={formData.dimensions.width}
-                    onChange={handleChange}
-                  />
-                  <input
-                    type="number"
-                    step="0.01"
-                    name="dimensions.height"
-                    placeholder="Height"
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    value={formData.dimensions.height}
-                    onChange={handleChange}
+                    placeholder="ml"
+                    value={formData.size.ml}
+                    onChange={(e) => handleSizeChange('ml', e.target.value)}
+                    className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Colors (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Red, Blue, Green"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  onChange={(e) => handleArrayChange('colors', e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sizes (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  placeholder="S, M, L, XL"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  onChange={(e) => handleArrayChange('sizes', e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Features (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Feature 1, Feature 2, Feature 3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  onChange={(e) => handleArrayChange('features', e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tags (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  placeholder="tag1, tag2, tag3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  onChange={(e) => handleArrayChange('tags', e.target.value)}
-                />
-              </div>
-
+              {/* Images */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Product Images *
@@ -409,7 +268,8 @@ const AddProduct = () => {
             </div>
           </div>
 
-          <div className="mt-8 flex justify-end space-x-4">
+          {/* Buttons */}
+          <div className="flex justify-end space-x-4">
             <button
               type="button"
               className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
