@@ -21,7 +21,7 @@ A modern e-commerce web application built with React, Tailwind CSS, and Firebase
 
 ## Tech Stack
 
-- **Frontend**: React 18, React Router DOM
+- **Frontend**: React 19, React Router DOM
 - **Styling**: Tailwind CSS
 - **Backend**: Firebase (Firestore, Auth, Storage)
 - **State Management**: React Context API
