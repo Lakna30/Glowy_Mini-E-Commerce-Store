@@ -103,7 +103,7 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="add-product flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="add-product flex items-center justify-center min-h-screen bg-[#484139]">
       <div className="container max-w-4xl mx-auto px-6 py-8 bg-white shadow-lg rounded-lg">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Add New Product</h1>

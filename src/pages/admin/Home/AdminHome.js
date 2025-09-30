@@ -92,7 +92,6 @@ const AdminHome = () => {
 
   return (
     <div className="admin-home">
-      <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
           <p className="text-gray-600">Welcome back! Here's what's happening with your store.</p>
@@ -243,7 +242,6 @@ const AdminHome = () => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

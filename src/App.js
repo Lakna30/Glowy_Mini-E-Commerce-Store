@@ -17,13 +17,18 @@ import MyOrders from './pages/user/Orders/MyOrders';
 // Admin Pages
 import AdminHome from './pages/admin/Home/AdminHome';
 import AddProduct from './pages/admin/Products/AddProduct';
+import AdminProducts from './pages/admin/Products/AdminProducts';
 import AdminOrders from './pages/admin/Orders/AdminOrders';
+import AdminCustomers from './pages/admin/Customers/AdminCustomers';
+import AdminReviews from './pages/admin/Reviews/AdminReviews';
+import AdminProfile from './pages/admin/Profile/AdminProfile';
 
 // Shared Components
 import Navbar from './components/shared/Navbar/Navbar';
 import Footer from './components/shared/Footer/Footer';
 import ProtectedRoute from './components/shared/ProtectedRoute/ProtectedRoute';
 import AdminRoute from './components/shared/AdminRoute/AdminRoute';
+import AdminLayout from './components/shared/AdminLayout/AdminLayout';
 
 // Layout component
 const Layout = ({ children }) => {
@@ -31,9 +36,16 @@ const Layout = ({ children }) => {
 
   const noNavRoutes = ['/login', '/signup'];
   const noFooterRoutes = ['/login', '/signup', '/cart'];
+  const adminRoutes = ['/admin', '/admin/add-product', '/admin/orders', '/admin/products', '/admin/reviews', '/admin/customers', '/admin/profile'];
 
-  const showNavbar = !noNavRoutes.includes(location.pathname);
-  const showFooter = !noFooterRoutes.includes(location.pathname);
+  const isAdminRoute = adminRoutes.some(route => location.pathname.startsWith(route));
+  const showNavbar = !noNavRoutes.includes(location.pathname) && !isAdminRoute;
+  const showFooter = !noFooterRoutes.includes(location.pathname) && !isAdminRoute;
+
+  // Use AdminLayout for admin routes
+  if (isAdminRoute) {
+    return <AdminLayout>{children}</AdminLayout>;
+  }
 
   return (
     <div className="App">
@@ -105,6 +117,38 @@ function App() {
                 element={
                   <AdminRoute>
                     <AdminOrders />
+                  </AdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/products" 
+                element={
+                  <AdminRoute>
+                    <AdminProducts />
+                  </AdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/customers" 
+                element={
+                  <AdminRoute>
+                    <AdminCustomers />
+                  </AdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/reviews" 
+                element={
+                  <AdminRoute>
+                    <AdminReviews />
+                  </AdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/profile" 
+                element={
+                  <AdminRoute>
+                    <AdminProfile />
                   </AdminRoute>
                 } 
               />
