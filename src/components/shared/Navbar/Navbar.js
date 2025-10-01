@@ -29,9 +29,9 @@ const Navbar = () => {
 
   return (
     <div className="bg-[#484139] p-4">
-    <nav className="bg-[#0D0806] text-white relative mx-4 mt-4 rounded-lg">
-      <div className="container mx-auto px-6 h-16 md:h-20 flex items-center justify-between relative">
-          
+      <nav className="bg-[#0D0806] text-white relative mx-4 mt-4 rounded-lg">
+        <div className="container mx-auto px-6 h-16 md:h-20 flex items-center justify-between relative">
+
           {/* Left Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
             {isAdmin ? (
@@ -40,7 +40,9 @@ const Navbar = () => {
                 <Link 
                   to="/admin" 
                   className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
-                    isActive('/admin') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                    isActive('/admin') 
+                      ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                      : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                   }`}
                 >
                   Dashboard
@@ -48,7 +50,9 @@ const Navbar = () => {
                 <Link 
                   to="/admin/add-product" 
                   className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
-                    isActive('/admin/add-product') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                    isActive('/admin/add-product') 
+                      ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                      : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                   }`}
                 >
                   Products
@@ -56,7 +60,9 @@ const Navbar = () => {
                 <Link 
                   to="/admin/orders" 
                   className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
-                    isActive('/admin/orders') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                    isActive('/admin/orders') 
+                      ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                      : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                   }`}
                 >
                   Orders
@@ -64,7 +70,9 @@ const Navbar = () => {
                 <Link 
                   to="/admin/reviews" 
                   className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
-                    isActive('/admin/reviews') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                    isActive('/admin/reviews') 
+                      ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                      : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                   }`}
                 >
                   Reviews
@@ -76,26 +84,40 @@ const Navbar = () => {
                 <Link 
                   to="/" 
                   className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
-                    isActive('/') ? 'bg-[#DDBB92] text-[#2B2A29]' : 'bg-transparent text-white hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                    isActive('/') 
+                      ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                      : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                   }`}
                 >
                   Home
                 </Link>
                 <Link 
                   to="/about" 
-                  className="hover:text-beige-300 transition-colors"
+                  className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
+                    isActive('/about') 
+                      ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                      : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                  }`}
                 >
                   About
                 </Link>
                 <Link 
                   to="/products" 
-                  className="hover:text-beige-300 transition-colors"
+                  className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
+                    isActive('/products') 
+                      ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                      : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                  }`}
                 >
                   Products
                 </Link>
                 <Link 
                   to="/contact" 
-                  className="hover:text-beige-300 transition-colors"
+                  className={`px-4 py-2 rounded-lg transition-colors duration-300 ease-in-out font-semibold ${
+                    isActive('/contact') 
+                      ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                      : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                  }`}
                 >
                   Contact us
                 </Link>
@@ -105,11 +127,11 @@ const Navbar = () => {
 
           {/* Center Logo */}
           <div className="absolute top-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-              <img 
-                src="Logo.png" 
-                alt="Glowy Logo" 
-                className="h-20 md:h-28 object-contain"
-              />
+            <img 
+              src="Logo.png" 
+              alt="Glowy Logo" 
+              className="h-20 md:h-28 object-contain"
+            />
           </div>
 
           {/* Right Side Icons and Actions */}
@@ -117,43 +139,37 @@ const Navbar = () => {
             {/* Search and Cart Icons - Only show for regular users */}
             {!isAdmin && (
               <>
-                {/* Search Icon */}
                 <Link
                   to="/search"
                   className="inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:opacity-90 transition-colors duration-300"
                 >
                   <Search className="w-5 h-5" />
                 </Link>
-
-                {/* Cart Icon */}
                 <div className="relative">
                   <Link
                     to="/cart"
                     className="relative inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:opacity-90 transition-colors duration-300"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                      {getTotalItems() > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-beige-500 text-brown-800 text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                          {getTotalItems()}
-                        </span>
-                      )}
+                    {getTotalItems() > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-beige-500 text-brown-800 text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
+                        {getTotalItems()}
+                      </span>
+                    )}
                   </Link>
                 </div>
               </>
             )}
 
             {/* Login/Register Button */}
-              {currentUser ? ( 
-                <div className="relative group">
-                  <button className="flex items-center text-white hover:text-beige-300 transition-colors">
-                    <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      <span>{currentUser.displayName || currentUser.email.split('@')[0]}
-                      </span> 
-                      </button>
-                
-                {/* Dropdown Menu */}
+            {currentUser ? ( 
+              <div className="relative group">
+                <button className="flex items-center text-white hover:text-beige-300 transition-colors">
+                  <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span>{currentUser.displayName || currentUser.email.split('@')[0]}</span> 
+                </button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   <Link to="/my-orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     My Orders
@@ -214,7 +230,9 @@ const Navbar = () => {
                   <Link 
                     to="/admin" 
                     className={`px-4 py-2 rounded transition-colors ${
-                      isActive('/admin') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                      isActive('/admin') 
+                        ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                        : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -223,7 +241,9 @@ const Navbar = () => {
                   <Link 
                     to="/admin/add-product" 
                     className={`px-4 py-2 rounded transition-colors ${
-                      isActive('/admin/add-product') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                      isActive('/admin/add-product') 
+                        ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                        : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -232,7 +252,9 @@ const Navbar = () => {
                   <Link 
                     to="/admin/orders" 
                     className={`px-4 py-2 rounded transition-colors ${
-                      isActive('/admin/orders') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                      isActive('/admin/orders') 
+                        ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                        : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -241,7 +263,9 @@ const Navbar = () => {
                   <Link 
                     to="/admin/reviews" 
                     className={`px-4 py-2 rounded transition-colors ${
-                      isActive('/admin/reviews') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                      isActive('/admin/reviews') 
+                        ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                        : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -254,7 +278,9 @@ const Navbar = () => {
                   <Link 
                     to="/" 
                     className={`px-4 py-2 rounded transition-colors ${
-                      isActive('/') ? 'bg-beige-500 text-brown-800' : 'hover:text-beige-300'
+                      isActive('/') 
+                        ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                        : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                     }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -262,28 +288,40 @@ const Navbar = () => {
                   </Link>
                   <Link 
                     to="/about" 
-                    className="hover:text-beige-300 transition-colors px-4 py-2"
+                    className={`px-4 py-2 rounded transition-colors ${
+                      isActive('/about') 
+                        ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                        : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                    }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     About
                   </Link>
                   <Link 
                     to="/products" 
-                    className="hover:text-beige-300 transition-colors px-4 py-2"
+                    className={`px-4 py-2 rounded transition-colors ${
+                      isActive('/products') 
+                        ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                        : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                    }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Products
                   </Link>
                   <Link 
                     to="/contact" 
-                    className="hover:text-beige-300 transition-colors px-4 py-2"
+                    className={`px-4 py-2 rounded transition-colors ${
+                      isActive('/contact') 
+                        ? 'bg-[#DDBB92] text-[#2B2A29] font-medium' 
+                        : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
+                    }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Contact us
                   </Link>
                 </>
               )}
-              
+
               {/* Cart section - Only show for regular users */}
               {!isAdmin && (
                 <div className="border-t border-brown-700 pt-4 mt-4">
@@ -297,48 +335,48 @@ const Navbar = () => {
                   </div>
                 </div>
               )}
-                
-                {currentUser ? (
-                  <div className="px-4 py-2 space-y-2">
-                    <Link to="/my-orders" className="block text-white hover:text-beige-300 transition-colors" onClick={() => setIsMenuOpen(false)}>
-                      My Orders
+
+              {currentUser ? (
+                <div className="px-4 py-2 space-y-2">
+                  <Link to="/my-orders" className="block text-white hover:text-beige-300 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    My Orders
+                  </Link>
+                  <Link to="/order-history" className="block text-white hover:text-beige-300 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                    Order History
+                  </Link>
+                  {isAdmin && (
+                    <Link to="/admin" className="block text-white hover:text-beige-300 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                      Admin Panel
                     </Link>
-                    <Link to="/order-history" className="block text-white hover:text-beige-300 transition-colors" onClick={() => setIsMenuOpen(false)}>
-                      Order History
-                    </Link>
-                    {isAdmin && (
-                      <Link to="/admin" className="block text-white hover:text-beige-300 transition-colors" onClick={() => setIsMenuOpen(false)}>
-                        Admin Panel
-                      </Link>
-                    )}
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsMenuOpen(false);
-                      }}
-                      className="block text-left text-white hover:text-beige-300 transition-colors"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                ) : (
-                  <div className="px-4 py-2">
-                    <Link 
-                      to="/login" 
-                      onClick={() => setIsMenuOpen(false)}
-                      className="inline-flex items-center space-x-2 bg-[#DDBB92] text-[#2B2A29] px-6 py-3 rounded-full font-semibold hover:bg-[#e6c79b] transition-colors"
-                    >
-                      <span>Login/Register</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                  </div>
-                )}
-              </div>
+                  )}
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="block text-left text-white hover:text-beige-300 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="px-4 py-2">
+                  <Link 
+                    to="/login" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="inline-flex items-center space-x-2 bg-[#DDBB92] text-[#2B2A29] px-6 py-3 rounded-full font-semibold hover:bg-[#e6c79b] transition-colors"
+                  >
+                    <span>Login/Register</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+              )}
             </div>
+          </div>
         )}
-    </nav>
+      </nav>
     </div>
   );
 };
