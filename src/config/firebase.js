@@ -23,6 +23,13 @@ const analytics = getAnalytics(app);
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Initialize Storage with custom settings
 export const storage = getStorage(app);
+
+// Add storage configuration for better CORS handling
+if (typeof window !== 'undefined') {
+  // Client-side only configuration
+}
 
 export default app;

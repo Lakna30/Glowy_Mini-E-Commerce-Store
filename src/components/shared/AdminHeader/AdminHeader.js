@@ -68,7 +68,6 @@ const AdminHeader = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log('Searching for:', searchQuery);
     // Implement search functionality
   };
 

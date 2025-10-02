@@ -21,7 +21,6 @@ const AdminProfile = () => {
 
   const handleSave = () => {
     // In a real app, you would update the user profile in Firebase
-    console.log('Saving profile:', profileData);
     setIsEditing(false);
   };
 

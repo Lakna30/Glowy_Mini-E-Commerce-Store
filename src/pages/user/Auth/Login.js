@@ -15,12 +15,9 @@ const Login = () => {
     e.preventDefault();
     try {
       await login(email, password);
-      console.log('Login successful, email:', email);
-      console.log('Is admin email:', isAdminEmail(email));
       alert('Logged in successfully.');
       // Check if email is admin email for immediate redirect
       const redirectPath = isAdminEmail(email) ? '/admin' : '/';
-      console.log('Redirecting to:', redirectPath);
       navigate(redirectPath);
     } catch (error) {
       console.error('Login error:', error);

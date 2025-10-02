@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../../../config/firebase';
+import { db } from '../../../config/firebase';
+import { uploadToCloudinary } from '../../../config/cloudinary';
 
 const AddProduct = () => {
   const [formData, setFormData] = useState({
@@ -83,12 +83,34 @@ const AddProduct = () => {
   }
   };
 
-  // upload images to Firebase Storage
+  // upload images to Cloudinary
   const uploadImages = async () => {
-    const uploadPromises = images.map(async (image) => {
-      const imageRef = ref(storage, `products/${Date.now()}_${image.name}`);
-      const snapshot = await uploadBytes(imageRef, image);
-      return getDownloadURL(snapshot.ref);
+    const uploadPromises = images.map(async (image, index) => {
+      try {
+        
+        const uploadOptions = {
+          folder: 'glowy/products', // Organize images in folders
+          // Note: transformations should be configured in the upload preset, not here
+        };
+        
+        
+        const result = await uploadToCloudinary(image, uploadOptions);
+        
+        return {
+          url: result.url,
+          publicId: result.publicId,
+          width: result.width,
+          height: result.height,
+          format: result.format
+        };
+      } catch (error) {
+        console.error(`❌ Failed to upload image ${index + 1} to Cloudinary:`, error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack
+        });
+        throw new Error(`Failed to upload ${image.name} to Cloudinary: ${error.message}`);
+      }
     });
     return Promise.all(uploadPromises);
   };
@@ -96,11 +118,34 @@ const AddProduct = () => {
   // submit form
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
+      // Check if required fields are filled
+      if (!formData.name.trim()) {
+        setLoading(false);
+        setError('Product name is required.');
+        return;
+      }
+      if (!formData.description.trim()) {
+        setLoading(false);
+        setError('Product description is required.');
+        return;
+      }
+      if (!formData.category) {
+        setLoading(false);
+        setError('Product category is required.');
+        return;
+      }
+      if (!formData.price) {
+        setLoading(false);
+        setError('Product price is required.');
+        return;
+      }
+
       // basic client-side validations
       const todayStr = new Date().toISOString().split('T')[0];
       if (formData.manufacturerDate && formData.manufacturerDate > todayStr) {
@@ -149,9 +194,16 @@ const AddProduct = () => {
         return;
       }
 
+
       let uploadedImageUrls = [];
       if (images.length > 0) {
-        uploadedImageUrls = await uploadImages();
+        try {
+          uploadedImageUrls = await uploadImages();
+        } catch (uploadError) {
+          setLoading(false);
+          setError(`Image upload failed: ${uploadError.message}. Please check your Cloudinary configuration.`);
+          return;
+        }
       }
 
       const productData = {
@@ -171,27 +223,34 @@ const AddProduct = () => {
         isActive: true
       };
 
-      const docRef = await addDoc(collection(db, 'products'), productData);
-      setSuccess(`Product added successfully with ID: ${docRef.id}`);
 
-      // reset form
-      setFormData({
-        name: '',
-        description: '',
-        price: '',
-        originalPrice: '',
-        category: '',
-        brand: '',
-        size: { type: '', ml: '' },
-        manufacturerDate: '',
-        expiryDate: '',
-        stockQuantity: ''
-      });
-      setImages([]);
+      try {
+        const docRef = await addDoc(collection(db, 'products'), productData);
+        setSuccess(`Product added successfully with ID: ${docRef.id}`);
+
+        // reset form
+        setFormData({
+          name: '',
+          description: '',
+          price: '',
+          originalPrice: '',
+          category: '',
+          brand: '',
+          size: { type: '', ml: '' },
+          manufacturerDate: '',
+          expiryDate: '',
+          stockQuantity: ''
+        });
+        setImages([]);
+      } catch (firestoreError) {
+        console.error('❌ Firestore save failed:', firestoreError);
+        setError(`Failed to save product: ${firestoreError.message}`);
+        return;
+      }
 
     } catch (error) {
-      console.error('Error adding product:', error);
-      setError('Failed to add product. Please try again.');
+      console.error('❌ Unexpected error adding product:', error);
+      setError(`Failed to add product: ${error.message || 'Unknown error occurred'}`);
     } finally {
       setLoading(false);
     }
@@ -204,6 +263,7 @@ const AddProduct = () => {
           <h1 className="text-3xl font-bold mb-2">Add New Product</h1>
           <p className="text-gray-600">Add a new product to your store</p>
         </div>
+
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">

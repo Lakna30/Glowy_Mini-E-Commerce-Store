@@ -149,23 +149,17 @@ export function AuthProvider({ children }) {
 
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
-        console.log('AuthContext - User email:', user.email);
-        console.log('AuthContext - User doc exists:', userDoc.exists());
         if (userDoc.exists()) {
           const data = userDoc.data();
-          console.log('AuthContext - User doc data:', data);
           const finalRole = data.role || (ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user');
-          console.log('AuthContext - Setting role to:', finalRole);
           setRole(finalRole);
         } else {
           const finalRole = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user';
-          console.log('AuthContext - No user doc, setting role to:', finalRole);
           setRole(finalRole);
         }
       } catch (error) {
         console.warn('Failed to fetch role:', error);
         const finalRole = ADMIN_EMAILS.includes(user.email) ? 'admin' : 'user';
-        console.log('AuthContext - Error case, setting role to:', finalRole);
         setRole(finalRole);
       } finally {
         setLoading(false);
