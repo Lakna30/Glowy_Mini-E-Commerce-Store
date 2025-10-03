@@ -24,12 +24,12 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="product-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      <Link to={`/product/${product.id}`} className="block">
-        <div className="relative">
+      <Link to={`/product/${product.id}`} className="block group">
+        <div className="relative overflow-hidden">
           <img
-            src={product.images?.[0] || '/placeholder-product.jpg'}
+            src={(Array.isArray(product.images) && (typeof product.images[0] === 'string' ? product.images[0] : product.images[0]?.url)) || '/placeholder-product.jpg'}
             alt={product.name}
-            className="w-full h-48 object-cover"
+            className="w-full h-48 object-cover transform transition-transform duration-300 group-hover:scale-105 cursor-pointer"
           />
           {getDiscountPercentage() > 0 && (
             <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-sm font-semibold">

@@ -87,7 +87,11 @@ const Product = () => {
           <div className="product-images">
             <div className="main-image mb-4">
               <img
-                src={product.images?.[selectedImage] || '/placeholder-product.jpg'}
+                src={(Array.isArray(product.images)
+                  ? (typeof product.images[selectedImage] === 'string'
+                      ? product.images[selectedImage]
+                      : product.images[selectedImage]?.url)
+                  : '/placeholder-product.jpg') || '/placeholder-product.jpg'}
                 alt={product.name}
                 className="w-full h-96 object-cover rounded-lg"
               />
@@ -98,7 +102,7 @@ const Product = () => {
                 {product.images.map((image, index) => (
                   <img
                     key={index}
-                    src={image}
+                    src={(typeof image === 'string' ? image : image?.url) || '/placeholder-product.jpg'}
                     alt={`${product.name} ${index + 1}`}
                     className={`w-20 h-20 object-cover rounded-lg cursor-pointer border-2 ${
                       selectedImage === index ? 'border-primary-500' : 'border-gray-200'
@@ -125,18 +129,20 @@ const Product = () => {
               )}
             </div>
 
-            <div className="rating mb-4">
-              <div className="flex items-center">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i}>★</span>
-                  ))}
+            {product.rating && (
+              <div className="rating mb-4">
+                <div className="flex items-center">
+                  <div className="flex text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className={i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}>★</span>
+                    ))}
+                  </div>
+                  <span className="ml-2 text-gray-600">
+                    ({product.reviewCount || 0} reviews)
+                  </span>
                 </div>
-                <span className="ml-2 text-gray-600">
-                  ({product.reviews?.length || 0} reviews)
-                </span>
               </div>
-            </div>
+            )}
 
             <div className="description mb-6">
               <p className="text-gray-700">{product.description}</p>
@@ -225,15 +231,44 @@ const Product = () => {
               </div>
             </div>
 
-            {/* Product Features */}
-            <div className="product-features">
-              <h3 className="text-lg font-semibold mb-2">Features</h3>
-              <ul className="space-y-1 text-gray-600">
-                <li>• Free shipping on orders over $50</li>
-                <li>• 30-day return policy</li>
-                <li>• 1-year warranty</li>
-                <li>• 24/7 customer support</li>
-              </ul>
+            {/* Additional details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {product.brand && (
+                <div>
+                  <span className="text-sm text-gray-500">Brand</span>
+                  <div className="text-gray-800 font-medium">{product.brand}</div>
+                </div>
+              )}
+              {product.category && (
+                <div>
+                  <span className="text-sm text-gray-500">Category</span>
+                  <div className="text-gray-800 font-medium">{product.category}</div>
+                </div>
+              )}
+              {product.size?.type && (
+                <div>
+                  <span className="text-sm text-gray-500">Size Type</span>
+                  <div className="text-gray-800 font-medium">{product.size.type}</div>
+                </div>
+              )}
+              {product.size?.ml && (
+                <div>
+                  <span className="text-sm text-gray-500">Volume</span>
+                  <div className="text-gray-800 font-medium">{product.size.ml} ml</div>
+                </div>
+              )}
+              {product.manufacturerDate && (
+                <div>
+                  <span className="text-sm text-gray-500">Manufactured</span>
+                  <div className="text-gray-800 font-medium">{product.manufacturerDate}</div>
+                </div>
+              )}
+              {product.expiryDate && (
+                <div>
+                  <span className="text-sm text-gray-500">Expiry</span>
+                  <div className="text-gray-800 font-medium">{product.expiryDate}</div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
 import { db } from '../../../config/firebase';
 import { X } from "lucide-react";
 
@@ -27,15 +28,7 @@ const AllProducts = () => {
     { name: "Sun Protection", key: "Sunscreen" }
   ];
 
-  // 🔹 Dummy Data
-  const dummyProducts = [
-    { id: 1, name: "Cleanser", price: 2300, image: "/luxury-skincare-cleanser-bottle.jpg", category: "Cleansers", topCategory: "Facial Care" },
-    { id: 2, name: "Cleanser", price: 2050, image: "/blue-skincare-tube-cleanser.jpg", category: "Cleansers", topCategory: "Facial Care" },
-    { id: 3, name: "Cleanser", price: 2650, image: "/green-skincare-cleanser-in-hands.jpg", category: "Cleansers", topCategory: "Facial Care" },
-    { id: 4, name: "Moisturizer", price: 3200, image: "/white-jar-moisturizer-cream.jpg", category: "Facial Oil", topCategory: "Facial Care" },
-    { id: 5, name: "Serum Set", price: 4500, image: "/yellow-serum-bottles-skincare-set.jpg", category: "Toners", topCategory: "Facial Care" },
-    { id: 6, name: "Sunscreen", price: 2800, image: "/blue-sunscreen-tube-beach.jpg", category: "Sunscreen", topCategory: "Sun Protection" }
-  ];
+  // 🔹 No dummy data. We show actual products only.
 
   // 🔹 Fetch products
   useEffect(() => {
@@ -43,21 +36,17 @@ const AllProducts = () => {
       try {
         const productsRef = collection(db, 'products');
         const querySnapshot = await getDocs(productsRef);
-        let productsData = querySnapshot.docs.map(doc => ({
+        const productsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
-
-        if (!productsData || productsData.length === 0) {
-          productsData = dummyProducts;
-        }
 
         setProducts(productsData);
         setFilteredProducts(productsData);
       } catch (error) {
         console.error('Error fetching products:', error);
-        setProducts(dummyProducts);
-        setFilteredProducts(dummyProducts);
+        setProducts([]);
+        setFilteredProducts([]);
       } finally {
         setLoading(false);
       }
@@ -266,12 +255,12 @@ const AllProducts = () => {
                 <div className="lg:col-span-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => (
-                      <div key={product.id} className="bg-white rounded-2xl shadow-sm">
-                        <div className="aspect-square bg-gray-100 p-4">
+                      <Link key={product.id} to={`/product/${product.id}`} className="bg-white rounded-2xl shadow-sm block group">
+                        <div className="aspect-square bg-gray-100 p-4 overflow-hidden">
                           <img
-                            src={product.image}
+                            src={(Array.isArray(product.images) && (typeof product.images[0] === 'string' ? product.images[0] : product.images[0]?.url)) || '/placeholder-product.jpg'}
                             alt={product.name}
-                            className="w-full h-full object-cover rounded-xl"
+                            className="w-full h-full object-cover rounded-xl transform transition-transform duration-300 group-hover:scale-105 cursor-pointer"
                           />
                         </div>
                         <div className="p-6">
@@ -281,7 +270,7 @@ const AllProducts = () => {
                             Add to cart
                           </button>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>

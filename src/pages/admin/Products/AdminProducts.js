@@ -98,7 +98,7 @@ const AdminProducts = () => {
                         <div className="flex-shrink-0 h-12 w-12">
                           <img
                             className="h-12 w-12 rounded-lg object-cover"
-                            src={product.image || '/placeholder-product.jpg'}
+                            src={(Array.isArray(product.images) && (typeof product.images[0] === 'string' ? product.images[0] : product.images[0]?.url)) || '/placeholder-product.jpg'}
                             alt={product.name}
                           />
                         </div>
