@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../../config/firebase';
-import { useCart } from '../../../contexts/CartContext';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../../config/firebase";
+import { useCart } from "../../../contexts/CartContext";
 
 const Product = () => {
   const { id } = useParams();
@@ -10,220 +10,187 @@ const Product = () => {
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedRating, setSelectedRating] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const productRef = doc(db, 'products', id);
+        const productRef = doc(db, "products", id);
         const productSnap = await getDoc(productRef);
-        
+
         if (productSnap.exists()) {
           setProduct({ id: productSnap.id, ...productSnap.data() });
         } else {
-          navigate('/products');
+          navigate("/products");
         }
       } catch (error) {
-        console.error('Error fetching product:', error);
-        navigate('/products');
+        console.error("Error fetching product:", error);
+        navigate("/products");
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) {
-      fetchProduct();
-    }
+    if (id) fetchProduct();
   }, [id, navigate]);
-
-  const handleAddToCart = () => {
-    if (product) {
-      addToCart({
-        ...product,
-        quantity,
-        selectedSize,
-        selectedColor
-      });
-      // You might want to show a success message here
-    }
-  };
 
   if (loading) {
     return (
-      <div className="product">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Loading product...</div>
-        </div>
+      <div className="bg-[#484139] text-center text-[#D4B998] h-screen flex items-center justify-center">
+        Loading product...
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="product">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Product not found</h1>
-            <button
-              onClick={() => navigate('/products')}
-              className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700"
-            >
-              Back to Products
-            </button>
-          </div>
-        </div>
+      <div className="bg-[#484139] text-center text-[#D4B998] h-screen flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-domine font-bold mb-4">
+          Product not found
+        </h1>
+        <button
+          onClick={() => navigate("/products")}
+          className="bg-[#D4B998] text-[#3b332b] px-6 py-3 rounded-lg font-semibold"
+        >
+          Back to Products
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="product bg-[#484139] min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumbs */}
-        <div className="bg-[#D4B998] px-6 py-3 mb-8 rounded-lg">
-          <nav className="text-[#463c30] text-sm">
-            <span>Home</span> <span className="mx-2">></span>
-            <span>Products</span> <span className="mx-2">></span>
-            <span className="font-semibold">{product.category || 'Product'}</span>
-          </nav>
-        </div>
+    <div className="bg-[#484139] min-h-screen flex flex-col items-center text-[#D4B998] font-domine px-6 py-10">
+      {/* Centered container */}
+      <div className="max-w-7xl w-full flex flex-col lg:flex-row gap-12 items-stretch justify-between max-h-[600px]">
+        {/* Product Info */}
+        <div className="bg-[#D4B998] text-[#3b332b] rounded-3xl p-8 shadow-xl w-full lg:w-1/3 flex flex-col">
+          <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
+          <p className="text-lg mb-4">
+            {product.description || "No description available."}
+          </p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Product Details - Left Column (Beige) */}
-          <div className="bg-[#D4B998] rounded-2xl p-8">
-            <h1 className="text-4xl font-serif font-bold text-[#463c30] mb-6">{product.name}</h1>
-            
-            <div className="description mb-6">
-              <h3 className="text-lg font-semibold text-[#463c30] mb-3">{product.name}:</h3>
-              <div className="text-[#463c30] space-y-2">
-                {product.description && (
-                  <p className="text-sm">{product.description}</p>
-                )}
-                {product.brand && (
-                  <p className="text-sm">• Brand: {product.brand}</p>
-                )}
-                {product.size?.ml && (
-                  <p className="text-sm">• Volume: {product.size.ml}ml</p>
-                )}
-              </div>
-            </div>
-
-            {product.brand && (
-              <div className="mb-4">
-                <span className="text-sm text-[#463c30]">All Types Of Skin</span>
-              </div>
-            )}
-
-            <div className="price mb-6">
-              <span className="text-4xl font-bold text-[#463c30]">
-                LKR {product.price?.toFixed(2)}
-              </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-xl text-[#927b5e] line-through ml-2">
-                  LKR {product.originalPrice.toFixed(2)}
-                </span>
-              )}
-            </div>
-
-            {product.rating && (
-              <div className="rating mb-6">
-                <div className="flex items-center">
-                  <div className="flex text-yellow-400 text-2xl">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className={i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}>★</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-              <button
-                className="bg-[#463c30] text-[#D4B998] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#3c352d] transition-colors"
-                onClick={handleAddToCart}
-              >
-                Buy Now
-              </button>
-              
-              <button
-                className="bg-[#D4B998] text-[#463c30] p-4 rounded-lg border-2 border-[#463c30] hover:bg-[#ddbb92] transition-colors"
-                onClick={handleAddToCart}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
-                </svg>
-              </button>
-              
-              <button className="bg-[#D4B998] text-[#463c30] p-4 rounded-lg border-2 border-[#463c30] hover:bg-[#ddbb92] transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </button>
-            </div>
+          <div className="text-3xl font-bold mb-4">
+            LKR {product.price?.toFixed(2)}
           </div>
 
-          {/* Product Images - Right Column (Dark Brown) */}
-          <div className="bg-[#3c352d] rounded-2xl p-8">
-            <div className="main-image mb-6">
-              <img
-                src={(Array.isArray(product.images)
-                  ? (typeof product.images[selectedImage] === 'string'
-                      ? product.images[selectedImage]
-                      : product.images[selectedImage]?.url)
-                  : '/placeholder-product.jpg') || '/placeholder-product.jpg'}
-                alt={product.name}
-                className="w-full h-96 object-cover rounded-lg"
-              />
-            </div>
-            
-            {product.images && product.images.length > 1 && (
-              <div className="thumbnail-images grid grid-cols-2 gap-4">
-                {product.images.slice(0, 2).map((image, index) => (
-                  <img
-                    key={index}
-                    src={(typeof image === 'string' ? image : image?.url) || '/placeholder-product.jpg'}
-                    alt={`${product.name} ${index + 1}`}
-                    className={`w-full h-32 object-cover rounded-lg cursor-pointer border-2 ${
-                      selectedImage === index ? 'border-[#D4B998]' : 'border-transparent'
-                    }`}
-                    onClick={() => setSelectedImage(index)}
-                  />
-                ))}
-              </div>
-            )}
+          <div className="flex items-center gap-1 mb-6">
+            {(() => {
+              const displayRating = Math.round(
+                Number(product?.rating ?? product?.avgRating ?? 0)
+              );
+              return [...Array(5)].map((_, i) => (
+                <svg
+                  key={i}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  className="w-6 h-6"
+                  fill={i < displayRating ? "#facc15" : "#ffffff"}
+                  stroke="#000000"
+                  strokeWidth="1"
+                >
+                  <path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z" />
+                </svg>
+              ));
+            })()}
+          </div>
+
+          <div className="flex gap-4 mt-auto">
+            <button
+              onClick={() => addToCart({ ...product, quantity: 1 })}
+              className="bg-[#3b332b] text-[#D4B998] px-8 py-3 rounded-full font-semibold hover:bg-[#2e2821] transition"
+            >
+              Buy Now
+            </button>
+            <button className="border-2 border-[#3b332b] bg-[#D4B998] text-[#3b332b] p-3 rounded-full hover:bg-[#e1caa5] transition">
+              🛒
+            </button>
+            <button className="border-2 border-[#3b332b] bg-[#D4B998] text-[#3b332b] p-3 rounded-full hover:bg-[#e1caa5] transition">
+              ♥
+            </button>
           </div>
         </div>
 
-        {/* Reviews Section */}
-        <div className="mt-12 bg-[#3c352d] rounded-2xl p-8">
-          <h2 className="text-3xl font-bold text-[#D4B998] mb-4">Reviews</h2>
-          <p className="text-[#D4B998] mb-6">No reviews</p>
-          
-          <h3 className="text-2xl font-bold text-[#D4B998] mb-4">Write a review</h3>
-          
-          <div className="mb-4">
-            <div className="flex text-yellow-400 text-2xl">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className="cursor-pointer hover:text-yellow-300">★</span>
-              ))}
-            </div>
-          </div>
-          
-          <div className="mb-6">
-            <textarea
-              placeholder="Write a review"
-              className="w-full h-32 p-4 bg-[#D4B998] text-[#463c30] rounded-lg border-2 border-[#927b5e] focus:border-[#463c30] focus:outline-none resize-none"
+        {/* Product Images */}
+        <div className="flex gap-4 w-full lg:w-2/3 flex-col lg:flex-row items-stretch">
+          {/* Main image */}
+          <div className="flex-1">
+            <img
+              src={
+                Array.isArray(product.images) && product.images[0]
+                  ? typeof product.images[0] === "string"
+                    ? product.images[0]
+                    : product.images[0]?.url
+                  : "/placeholder-product.jpg"
+              }
+              alt={product.name}
+              className="w-full h-full object-cover rounded-lg"
             />
           </div>
-          
-          <button className="bg-[#927b5e] text-[#D4B998] px-6 py-3 rounded-lg font-semibold hover:bg-[#8a6f5a] transition-colors">
-            Submit
-          </button>
+
+          {/* Thumbnails: only image index 1 & 2 */}
+          {product.images && product.images.length > 2 && (
+            <div className="flex flex-col gap-4 h-full justify-between">
+              {[1, 2].map((index) => {
+                const image = product.images[index];
+                return (
+                  <img
+                    key={index}
+                    src={typeof image === "string" ? image : image?.url || "/placeholder-product.jpg"}
+                    alt={`${product.name} ${index + 1}`}
+                    className="w-full h-1/2 object-cover rounded-lg border-2 border-transparent"
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="mt-14 rounded-3xl p-8 text-[#E3D5C5] w-full max-w-6xl">
+        <h2 className="text-3xl font-serif font-bold mb-4">Reviews</h2>
+        <p className="mb-6">No reviews</p>
+
+        <h3 className="text-2xl font-serif font-bold mb-4">Write a review</h3>
+
+        <div className="flex items-center gap-2 mb-4">
+          {[...Array(5)].map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setSelectedRating(i + 1)}
+              aria-label={`Rate ${i + 1} star${i === 0 ? "" : "s"}`}
+              className="focus:outline-none"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="w-7 h-7"
+                fill={i < selectedRating ? "#facc15" : "#ffffff"}
+                stroke="#000000"
+                strokeWidth="1"
+              >
+                <path d="M12 2l2.9 6.26L22 9.27l-5 4.87L18.18 22 12 18.56 5.82 22 7 14.14l-5-4.87 7.1-1.01L12 2z" />
+              </svg>
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          placeholder="Write a review"
+          className="w-full h-32 p-4 bg-[#E3D5C5] text-[#83715E] rounded-xl border border-[#bfa57f] focus:outline-none focus:border-[#3b332b] mb-4"
+        ></textarea>
+
+        <button className="bg-[#D4B998] text-[#3b332b] w-full py-3 rounded-full font-semibold hover:bg-[#e1caa5] transition">
+          Submit
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="w-full mt-3 border-2 border-[#3b332b] text-[#3b332b] bg-transparent py-3 rounded-full font-semibold hover:bg-[#e1caa5] transition"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
+    "./src/**/*.{js,jsx,ts,tsx}", // ✅ only define once, here
   ],
   theme: {
     extend: {
@@ -53,16 +53,21 @@ module.exports = {
           700: '#543f99',
           800: '#3d2f66',
           900: '#261f33',
-        }
+        },
       },
+
+      // ✅ Fonts setup
       fontFamily: {
         serif: ['Playfair Display', 'serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        domine: ['Domine', 'serif'], // custom Domine font
       },
+
+      // ✅ Backgrounds
       backgroundImage: {
         'hero-pattern': "url('/hero-bg.jpg')",
-      }
+      },
     },
   },
   plugins: [],
-}
+};
