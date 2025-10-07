@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import { useCart } from "../../../contexts/CartContext";
+import { Heart, ShoppingCart, ChevronLeft } from "lucide-react";
 
 const Product = () => {
   const { id } = useParams();
@@ -45,7 +46,7 @@ const Product = () => {
   if (!product) {
     return (
       <div className="bg-[#484139] text-center text-[#D4B998] h-screen flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-domine font-bold mb-4">
+        <h1 className="text-2xl font-serif font-bold mb-4">
           Product not found
         </h1>
         <button
@@ -59,13 +60,26 @@ const Product = () => {
   }
 
   return (
-    <div className="bg-[#484139] min-h-screen flex flex-col items-center text-[#D4B998] font-domine px-6 py-10">
+    <div className="bg-[#484139] min-h-screen flex flex-col items-center text-[#D4B998] px-6 py-10">
+      
+      {/* Back Navigation Icon */}
+      <div
+        onClick={() => navigate("/products")}
+        className="absolute top-30 left-7 cursor-pointer opacity-80 hover:opacity-100 transition-all duration-200"
+      >
+        <ChevronLeft
+          size={32}
+          className="text-[#D4B998] hover:text-[#e1caa5] transition transform hover:scale-110"
+          title="Back to Products"
+        />
+      </div>
+
       {/* Centered container */}
       <div className="max-w-7xl w-full flex flex-col lg:flex-row gap-12 items-stretch justify-between max-h-[600px]">
         {/* Product Info */}
-        <div className="bg-[#D4B998] text-[#3b332b] rounded-3xl p-8 shadow-xl w-full lg:w-1/3 flex flex-col">
-          <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
-          <p className="text-lg mb-4">
+        <div className="bg-[#D4B998] text-[#463C30] rounded-3xl p-8 shadow-xl w-full lg:w-1/3 flex flex-col">
+          <h1 className="text-4xl font-domine font-bold mb-4">{product.name}</h1>
+          <p className="text-lg text-[#463C30] mb-4">
             {product.description || "No description available."}
           </p>
 
@@ -94,19 +108,22 @@ const Product = () => {
             })()}
           </div>
 
-          <div className="flex gap-4 mt-auto">
+          <div className="flex items-center justify-end mt-auto">
             <button
               onClick={() => addToCart({ ...product, quantity: 1 })}
-              className="bg-[#3b332b] text-[#D4B998] px-8 py-3 rounded-full font-semibold hover:bg-[#2e2821] transition"
+              className="bg-[#463C30] text-[#D4B998] px-8 py-3 rounded-xl font-semibold text-lg hover:bg-[#2e2821] transition mr-20"
             >
               Buy Now
             </button>
-            <button className="border-2 border-[#3b332b] bg-[#D4B998] text-[#3b332b] p-3 rounded-full hover:bg-[#e1caa5] transition">
-              🛒
-            </button>
-            <button className="border-2 border-[#3b332b] bg-[#D4B998] text-[#3b332b] p-3 rounded-full hover:bg-[#e1caa5] transition">
-              ♥
-            </button>
+
+            <div className="flex items-center gap-4">
+              <button className="w-14 h-14 flex items-center justify-center bg-[#463C30] text-[#D4B998] rounded-xl hover:bg-[#2e2821] transition">
+                <ShoppingCart className="w-6 h-6" />
+              </button>
+              <button className="w-14 h-14 flex items-center justify-center bg-[#463C30] text-[#D4B998] rounded-xl hover:bg-[#2e2821] transition">
+                <Heart className="w-6 h-6" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -181,13 +198,13 @@ const Product = () => {
           className="w-full h-32 p-4 bg-[#E3D5C5] text-[#83715E] rounded-xl border border-[#bfa57f] focus:outline-none focus:border-[#3b332b] mb-4"
         ></textarea>
 
-        <button className="bg-[#D4B998] text-[#3b332b] w-full py-3 rounded-full font-semibold hover:bg-[#e1caa5] transition">
+        <button className="bg-[#D4B998] text-[#3b332b] w-full py-3 rounded-full font-serif font-semibold hover:bg-[#e1caa5] transition">
           Submit
         </button>
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="w-full mt-3 border-2 border-[#3b332b] text-[#3b332b] bg-transparent py-3 rounded-full font-semibold hover:bg-[#e1caa5] transition"
+          className="w-full mt-3 border-2 border-[#D4B998] text-[#E3D5C5] bg-transparent py-3 rounded-full font-semibold hover:bg-[#e1caa5] hover:text-[#3b332b] transition"
         >
           Cancel
         </button>
