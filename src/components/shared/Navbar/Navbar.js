@@ -4,6 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useCart } from '../../../contexts/CartContext';
 import { isAdminEmail } from '../../../constants/admin';
 import { Search, ShoppingCart } from 'lucide-react';
+import CartDrawer from '../CartDrawer/CartDrawer';
 
 const Navbar = () => {
   const { currentUser, logout } = useAuth();
@@ -11,6 +12,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showEmptyTooltip, setShowEmptyTooltip] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -146,17 +149,24 @@ const Navbar = () => {
                   <Search className="w-5 h-5" />
                 </Link>
                 <div className="relative">
-                  <Link
-                    to="/cart"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (getTotalItems() > 0) {
+                        setIsCartOpen(true);
+                      }
+                    }}
+                    onMouseEnter={() => setShowEmptyTooltip(getTotalItems() === 0)}
+                    onMouseLeave={() => setShowEmptyTooltip(false)}
                     className="relative inline-flex items-center justify-center bg-[#DDBB92] text-[#2B2A29] p-3 rounded-lg hover:opacity-90 transition-colors duration-300"
+                    aria-label="Open cart"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    {getTotalItems() > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-beige-500 text-brown-800 text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                        {getTotalItems()}
-                      </span>
-                    )}
-                  </Link>
+                    <span className="absolute -top-2 -right-2 bg-beige-500 text-brown-800 text-xs rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center font-semibold">{getTotalItems()}</span>
+                  </button>
+                  {showEmptyTooltip && (
+                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white text-[#2B2A29] text-xs px-2 py-1 rounded shadow">Cart is empty</div>
+                  )}
                 </div>
               </>
             )}
@@ -322,16 +332,31 @@ const Navbar = () => {
                 </>
               )}
 
-              {/* Cart section - Only show for regular users */}
+              {/* Cart section - Only show for regular users */
+              }
               {!isAdmin && (
                 <div className="border-t border-brown-700 pt-4 mt-4">
                   <div className="flex items-center justify-between px-4 py-2">
-                    <Link to="/cart" className="flex items-center text-white hover:text-beige-300 transition-colors">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (getTotalItems() > 0) {
+                          setIsCartOpen(true);
+                          setIsMenuOpen(false);
+                        }
+                      }}
+                      onMouseEnter={() => setShowEmptyTooltip(getTotalItems() === 0)}
+                      onMouseLeave={() => setShowEmptyTooltip(false)}
+                      className="flex items-center text-white hover:text-beige-300 transition-colors relative"
+                    >
                       <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                       </svg>
                       Cart ({getTotalItems()})
-                    </Link>
+                      {showEmptyTooltip && (
+                        <span className="absolute -bottom-6 left-0 bg-white text-[#2B2A29] text-xs px-2 py-1 rounded shadow">Cart is empty</span>
+                      )}
+                    </button>
                   </div>
                 </div>
               )}
@@ -377,6 +402,7 @@ const Navbar = () => {
           </div>
         )}
       </nav>
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </div>
   );
 };
