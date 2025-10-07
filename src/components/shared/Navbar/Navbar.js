@@ -162,10 +162,10 @@ const Navbar = () => {
                     aria-label="Open cart"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    <span className="absolute -top-2 -right-2 bg-beige-500 text-brown-800 text-xs rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center font-semibold">{getTotalItems()}</span>
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">{getTotalItems()}</span>
                   </button>
                   {showEmptyTooltip && (
-                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white text-[#2B2A29] text-xs px-2 py-1 rounded shadow">Cart is empty</div>
+                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-red-500 text-white text-sm px-3 py-1 rounded-lg shadow-lg whitespace-nowrap animate-fade-in">Cart is empty</div>
                   )}
                 </div>
               </>
@@ -354,7 +354,7 @@ const Navbar = () => {
                       </svg>
                       Cart ({getTotalItems()})
                       {showEmptyTooltip && (
-                        <span className="absolute -bottom-6 left-0 bg-white text-[#2B2A29] text-xs px-2 py-1 rounded shadow">Cart is empty</span>
+                        <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-red-500 text-white text-sm px-3 py-1 rounded-lg shadow-lg whitespace-nowrap animate-fade-in">Cart is empty</span>
                       )}
                     </button>
                   </div>
