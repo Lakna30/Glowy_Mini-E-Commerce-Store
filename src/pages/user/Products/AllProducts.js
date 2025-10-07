@@ -3,6 +3,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { db } from '../../../config/firebase';
 import { X } from "lucide-react";
+import { Listbox } from "@headlessui/react";
 
 const AllProducts = () => {
   // 🔹 State
@@ -14,23 +15,43 @@ const AllProducts = () => {
   const [sortBy, setSortBy] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
 
+  // 🔹 Sort options for dropdown
+  const sortOptions = [
+    { value: "", label: "Default" },
+    { value: "a-z", label: "Name (A - Z)" },
+    { value: "z-a", label: "Name (Z - A)" },
+    { value: "price-low", label: "Price (Low → High)" },
+    { value: "price-high", label: "Price (High → Low)" },
+  ];
+
   // 🔹 Filter categories
   const filterCategories = [
-    "Cleansers", "Exfoliators", "Toners",
-    "Retinols", "Facial Oil", "Sunscreen", "Eye Care"
+    "Shampoo", "Conditioner", "Body Lotion",
+    "Moisturizer", "Cleanser", "Serum", "Toner", "Spray Sunscreen", "Stick Sunscreen"
   ];
 
   // 🔹 Top Category Bar
   const topCategories = [
-    { name: "Hair Care", key: "Hair Care" },
-    { name: "Body Care", key: "Body Care" },
-    { name: "Facial Care", key: "Facial Care" },
-    { name: "Sun Protection", key: "Sunscreen" }
+    { name: "Hair Care", key: "hair" },
+    { name: "Body Care", key: "body" },
+    { name: "Facial Care", key: "face" },
+    { name: "Sun Protection", key: "sun" }
   ];
 
-  // 🔹 No dummy data. We show actual products only.
+  // 🔹 Sidebar keyword mapping
+  const sidebarKeywordMap = {
+    "Shampoo": ["shampoo"],
+    "Conditioner": ["conditioner"],
+    "Body Lotion": ["body lotion"],
+    "Moisturizer": ["moisturizer"],
+    "Cleanser": ["cleanser"],
+    "Serum": ["serum"],
+    "Toner": ["toner"],
+    "Spray Sunscreen": ["spray sunscreen"],
+    "Stick Sunscreen": ["stick sunscreen"],
+  };
 
-  // 🔹 Fetch products
+  // 🔹 Fetch products from Firestore
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -55,7 +76,7 @@ const AllProducts = () => {
     fetchProducts();
   }, []);
 
-  // 🔹 Filtering & Sorting
+  // 🔹 Filtering & Sorting Logic
   useEffect(() => {
     let filtered = [...products];
 
@@ -67,14 +88,22 @@ const AllProducts = () => {
       );
     }
 
-    // Sidebar Category filter
+    // Sidebar precise filter
     if (appliedFilters.length > 0) {
-      filtered = filtered.filter(product => appliedFilters.includes(product.category));
+      filtered = filtered.filter((product) => {
+        const searchable = `${product.name || ''} ${product.description || ''}`.toLowerCase();
+        return appliedFilters.some((filterLabel) => {
+          const keywords = sidebarKeywordMap[filterLabel] || [];
+          return keywords.some((kw) => searchable.includes(kw));
+        });
+      });
     }
 
     // Top Category Bar filter
     if (activeCategory !== "All") {
-      filtered = filtered.filter(product => product.topCategory === activeCategory);
+      filtered = filtered.filter(
+        (product) => product.category === activeCategory || product.topCategory === activeCategory
+      );
     }
 
     // Sorting
@@ -91,6 +120,7 @@ const AllProducts = () => {
     setFilteredProducts(filtered);
   }, [products, searchTerm, appliedFilters, sortBy, activeCategory]);
 
+  // 🔹 Loading State
   if (loading) {
     return (
       <div className="all-products">
@@ -118,41 +148,87 @@ const AllProducts = () => {
           </div>
         </section>
 
-        {/* Top Category Bar - Horizontal with Icons */}
-        <section className="px-6 mb-12">
-          <div className="w-full px-8 flex justify-center gap-6 flex-wrap">
-          {topCategories.map((cat) => (
-            <button
-              key={cat.key}
-              onClick={() => setActiveCategory(cat.key)}
-              className={`flex items-center space-x-3 bg-[#D4B998] rounded-2xl px-6 py-4 min-w-[19rem] shadow-md transition-transform duration-300 cursor-pointer
-              hover:scale-105 hover:shadow-2xl
-              ${activeCategory === cat.key ? "scale-105 shadow-2xl bg-[#3c352d] text-white" : "text-[#463C30]"}`
-              }
-            >
-              {/* Icon */}
-              <div className="w-16 h-16 bg-purple-100 rounded-3xl flex items-center justify-center">
-                <img
-                  src={
-                  cat.key === "Hair Care"
-                  ? "HairCareIcon.png"
-                  : cat.key === "Body Care"
-                  ? "BodyCareIcon.png"
-                  : cat.key === "Facial Care"
-                  ? "FacialCareIcon.png"
-                  : "SunProtectionIcon.png"
-                  }
-                  alt={cat.name}
-                  className="w-full h-full object-cover rounded-3xl"
-                />
+        {/* Top Category Bar */}
+        <section className="px-6 mb-0 -mt-8">
+          <div className="w-full px-8">
+            <div className="hidden lg:flex flex-col items-center">
+              <div className="flex justify-center flex-wrap gap-6">
+                {topCategories.map((cat) => (
+                  <button
+                    key={cat.key}
+                    onClick={() => setActiveCategory(cat.key)}
+                    className={`flex items-center space-x-3 bg-[#D4B998] rounded-2xl px-6 py-4 min-w-[19rem] shadow-md transition-transform duration-300 cursor-pointer
+                      hover:scale-105 hover:shadow-2xl
+                      ${activeCategory === cat.key ? "scale-105 shadow-2xl bg-[#3c352d] text-white" : "text-[#463C30]"}`}
+                  >
+                    <div className="w-16 h-16 bg-purple-100 rounded-3xl flex items-center justify-center">
+                      <img
+                        src={
+                          cat.name === "Hair Care"
+                            ? "HairCareIcon.png"
+                            : cat.name === "Body Care"
+                            ? "BodyCareIcon.png"
+                            : cat.name === "Facial Care"
+                            ? "FacialCareIcon.png"
+                            : "SunProtectionIcon.png"
+                        }
+                        alt={cat.name}
+                        className="w-full h-full object-cover rounded-3xl"
+                      />
+                    </div>
+                    <span className="font-serif font-semibold text-lg">{cat.name}</span>
+                  </button>
+                ))}
               </div>
 
-              {/* Label */}
-              <span className="font-serif font-semibold text-lg">
-                {cat.name}
-              </span>
-            </button>
-            ))}
+              {/* All Products button */}
+              <div className="mt-6 w-full flex justify-end pr-12">
+                <button
+                  onClick={() => { setActiveCategory('All'); setAppliedFilters([]); setSearchTerm(''); }}
+                  className="border-2 border-[#D4B998] text-[#E3D5C5] bg-transparent rounded-lg px-8 py-2 font-semibold hover:bg-[#e1caa5] hover:text-[#3b332b] transition"
+                >
+                  All Products
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile layout */}
+            <div className="lg:hidden flex flex-col items-center gap-4">
+              <div className="w-full flex justify-center gap-4 flex-wrap">
+                {topCategories.map((cat) => (
+                  <button
+                    key={cat.key}
+                    onClick={() => setActiveCategory(cat.key)}
+                    className={`flex items-center space-x-3 bg-[#D4B998] rounded-2xl px-6 py-4 min-w-[16rem] shadow-md transition-transform duration-300 cursor-pointer
+                      hover:scale-105 hover:shadow-2xl
+                      ${activeCategory === cat.key ? "scale-105 shadow-2xl bg-[#3c352d] text-white" : "text-[#463C30]"}`}
+                  >
+                    <div className="w-14 h-14 bg-purple-100 rounded-3xl flex items-center justify-center">
+                      <img
+                        src={
+                          cat.name === "Hair Care"
+                            ? "HairCareIcon.png"
+                            : cat.name === "Body Care"
+                            ? "BodyCareIcon.png"
+                            : cat.name === "Facial Care"
+                            ? "FacialCareIcon.png"
+                            : "SunProtectionIcon.png"
+                        }
+                        alt={cat.name}
+                        className="w-full h-full object-cover rounded-3xl"
+                      />
+                    </div>
+                    <span className="font-serif font-semibold text-lg">{cat.name}</span>
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => { setActiveCategory('All'); setAppliedFilters([]); setSearchTerm(''); }}
+                className="whitespace-nowrap bg-[#3c352d] text-white rounded-full px-6 py-2 shadow-md hover:bg-[#2f2923]"
+              >
+                All Products
+              </button>
+            </div>
           </div>
         </section>
 
@@ -160,7 +236,7 @@ const AllProducts = () => {
         <section className="px-6 pb-16">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              
+
               {/* Sidebar Filter */}
               <div className="lg:col-span-1">
                 <div className="bg-[#D4B998] rounded-2xl p-6 h-fit">
@@ -182,26 +258,6 @@ const AllProducts = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full mb-6 px-3 py-2 border border-[#927b5e] rounded-lg text-sm"
                   />
-
-                  {/* Applied Filters */}
-                  {appliedFilters.length > 0 && (
-                    <div className="mb-6">
-                      <h4 className="text-[#463c30] font-medium mb-3">Applied filters</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {appliedFilters.map((filter) => (
-                          <div key={filter} className="flex items-center bg-white rounded-full px-3 py-1 text-sm">
-                            <span className="text-[#463c30]">{filter}</span>
-                            <X
-                              className="h-3 w-3 ml-2 text-[#927b5e] cursor-pointer"
-                              onClick={() =>
-                                setAppliedFilters(appliedFilters.filter((c) => c !== filter))
-                              }
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {/* Category Filter */}
                   <div className="mb-8">
@@ -233,17 +289,29 @@ const AllProducts = () => {
                   {/* Sort Dropdown */}
                   <div>
                     <h4 className="text-[#463c30] font-medium mb-4">Sort by</h4>
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full px-3 py-2 border border-[#927b5e] rounded-lg text-sm"
-                    >
-                      <option value="">Default</option>
-                      <option value="a-z">Name (A - Z)</option>
-                      <option value="z-a">Name (Z - A)</option>
-                      <option value="price-low">Price (Low → High)</option>
-                      <option value="price-high">Price (High → Low)</option>
-                    </select>
+                    <Listbox value={sortBy} onChange={setSortBy}>
+                      <div className="relative">
+                        <Listbox.Button className="w-full px-3 py-2 border border-[#927b5e] rounded-lg text-sm bg-white">
+                          {sortOptions.find((o) => o.value === sortBy)?.label || "Select"}
+                        </Listbox.Button>
+
+                        <Listbox.Options className="absolute w-full mt-1 rounded-lg bg-[#FFFFFF] text-[#000000] shadow-lg z-10">
+                          {sortOptions.map((option) => (
+                            <Listbox.Option
+                              key={option.value}
+                              value={option.value}
+                              className={({ active }) =>
+                                `cursor-pointer select-none px-3 py-2 ${
+                                  active ? "bg-[#dec6a9]" : "bg-[#FFFFFF]"
+                                }`
+                              }
+                            >
+                              {option.label}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </div>
+                    </Listbox>
                   </div>
                 </div>
               </div>
@@ -252,15 +320,15 @@ const AllProducts = () => {
               {filteredProducts.length === 0 ? (
                 <p className="text-center text-white">No products found.</p>
               ) : (
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-3 mt-6 lg:mt-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => (
                       <Link key={product.id} to={`/product/${product.id}`} className="bg-white rounded-2xl shadow-sm block group">
-                        <div className="aspect-square bg-gray-100 p-4 overflow-hidden">
+                        <div className="aspect-square bg-gray-100 p-4 overflow-hidden rounded-2xl">
                           <img
                             src={(Array.isArray(product.images) && (typeof product.images[0] === 'string' ? product.images[0] : product.images[0]?.url)) || '/placeholder-product.jpg'}
                             alt={product.name}
-                            className="w-full h-full object-cover rounded-xl transform transition-transform duration-300 group-hover:scale-105 cursor-pointer"
+                            className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105 cursor-pointer"
                           />
                         </div>
                         <div className="p-6">
