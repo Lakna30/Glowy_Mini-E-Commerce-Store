@@ -350,14 +350,14 @@ const AllProducts = () => {
                     {filteredProducts.map((product) => (
                       <div key={product.id} className="bg-white rounded-2xl shadow-sm group relative">
                         {/* Stock warning */}
-                        {product.stock && product.stock > 0 && product.stock < 10 && (
+                        {product.stockQuantity && product.stockQuantity > 0 && product.stockQuantity < 10 && (
                           <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold z-10">
-                            Only {product.stock} items left
+                            Only {product.stockQuantity} items left
                           </div>
                         )}
                         
                         {/* Out of stock overlay */}
-                        {(!product.stock || product.stock === 0) && (
+                        {(!product.stockQuantity || product.stockQuantity === 0) && (
                           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-2xl z-10">
                             <span className="text-white font-semibold">Out of Stock</span>
                           </div>
@@ -379,10 +379,10 @@ const AllProducts = () => {
                           <p className="text-[#463c30] text-lg font-semibold mb-4">LKR {product.price}</p>
                           <button 
                             onClick={(e) => handleAddToCart(product, e)}
-                            disabled={!product.stock || product.stock === 0}
+                            disabled={!product.stockQuantity || product.stockQuantity === 0}
                             className="w-full bg-[#d4b998] text-[#463c30] hover:bg-[#ddbb92] rounded-full font-medium py-2 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
                           >
-                            {!product.stock || product.stock === 0 ? 'Out of Stock' : 'Add to cart'}
+                            {!product.stockQuantity || product.stockQuantity === 0 ? 'Out of Stock' : 'Add to cart'}
                           </button>
                         </div>
                       </div>

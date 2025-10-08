@@ -36,7 +36,7 @@ const ProductCard = ({ product }) => {
               -{getDiscountPercentage()}%
             </div>
           )}
-          {product.stock === 0 && (
+          {product.stockQuantity === 0 && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
               <span className="text-white font-semibold">Out of Stock</span>
             </div>
@@ -55,11 +55,11 @@ const ProductCard = ({ product }) => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
               <span className="text-lg font-bold text-primary-600">
-                ${formatPrice(product.price)}
+                LKR {formatPrice(product.price)}
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
                 <span className="text-sm text-gray-500 line-through">
-                  ${formatPrice(product.originalPrice)}
+                  LKR {formatPrice(product.originalPrice)}
                 </span>
               )}
             </div>
@@ -80,8 +80,8 @@ const ProductCard = ({ product }) => {
           
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              {product.stock > 0 ? (
-                <span className="text-green-600">In Stock ({product.stock})</span>
+              {product.stockQuantity > 0 ? (
+                <span className="text-green-600">In Stock ({product.stockQuantity})</span>
               ) : (
                 <span className="text-red-600">Out of Stock</span>
               )}
@@ -89,10 +89,10 @@ const ProductCard = ({ product }) => {
             
             <button
               onClick={handleAddToCart}
-              disabled={product.stock === 0}
+              disabled={product.stockQuantity === 0}
               className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium"
             >
-              {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+              {product.stockQuantity === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
           </div>
         </div>

@@ -21,7 +21,7 @@ const ShoppingCart = () => {
     return (
       <div className="shopping-cart">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
+          <div className="text-center py-12 bg-yellow-100 rounded-lg border border-yellow-300 shadow-md mx-auto max-w-xl">
             <div className="text-6xl mb-4">🛒</div>
             <h1 className="text-3xl font-bold mb-4">Your cart is empty</h1>
             <p className="text-gray-600 mb-8">
@@ -86,7 +86,7 @@ const ShoppingCart = () => {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
                   <span>Subtotal ({getTotalItems()} items)</span>
-                  <span>${getTotalPrice().toFixed(2)}</span>
+                  <span>LKR {getTotalPrice().toFixed(2)}</span>
                 </div>
                 
                 <div className="flex justify-between">

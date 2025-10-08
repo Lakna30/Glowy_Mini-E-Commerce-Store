@@ -12,20 +12,19 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
   const formatPrice = (price) => {
     return price?.toFixed(2) || '0.00';
   };
-
   return (
     <div className="cart-item flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
       <div className="flex-shrink-0">
         <img
-          src={item.imageUrl || '/placeholder-product.jpg'}
+          src={(Array.isArray(item.images) && (typeof item.images[0] === 'string' ? item.images[0] : item.images[0]?.url)) || (typeof item.imageUrl === 'string' ? item.imageUrl : '/placeholder-product.jpg')}
           alt={item.name}
           className="w-20 h-20 object-cover rounded-lg"
+          onError={e => { e.target.onerror = null; e.target.src = '/placeholder-product.jpg'; }}
         />
       </div>
       
       <div className="flex-1 min-w-0">
         <h3 className="font-semibold text-lg truncate">{item.name}</h3>
-        
         {item.brand && (
           <p className="text-sm text-gray-600">{item.brand}</p>
         )}

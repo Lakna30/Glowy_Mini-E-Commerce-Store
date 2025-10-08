@@ -32,7 +32,7 @@ const Navbar = () => {
 
   return (
     <div className="bg-[#484139] p-4">
-      <nav className="bg-[#0D0806] text-white relative mx-4 mt-4 rounded-lg">
+      <nav className="bg-[#0D0806] text-white relative mx-4 mt-4 rounded-lg overflow-visible">
         <div className="container mx-auto px-6 h-16 md:h-20 flex items-center justify-between relative">
 
           {/* Left Navigation Links */}
@@ -162,10 +162,14 @@ const Navbar = () => {
                     aria-label="Open cart"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">{getTotalItems()}</span>
+                    {currentUser && (
+  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">{getTotalItems()}</span>
+) }
                   </button>
                   {showEmptyTooltip && (
-                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-red-500 text-white text-sm px-3 py-1 rounded-lg shadow-lg whitespace-nowrap animate-fade-in">Cart is empty</div>
+                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 bg-yellow-100 text-[#2B2A29] text-sm px-4 py-2 rounded-xl shadow-lg whitespace-nowrap border border-yellow-300 animate-fade-in z-50">
+                      Cart is empty
+                    </div>
                   )}
                 </div>
               </>
@@ -352,9 +356,9 @@ const Navbar = () => {
                       <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
                       </svg>
-                      Cart ({getTotalItems()})
+                      Cart {currentUser && `(${getTotalItems()})`}
                       {showEmptyTooltip && (
-                        <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-red-500 text-white text-sm px-3 py-1 rounded-lg shadow-lg whitespace-nowrap animate-fade-in">Cart is empty</span>
+                        <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-yellow-100 text-[#2B2A29] text-sm px-4 py-2 rounded-xl shadow-lg whitespace-nowrap border border-yellow-300 animate-fade-in">Cart is empty</span>
                       )}
                     </button>
                   </div>

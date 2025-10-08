@@ -18,6 +18,8 @@ import MyOrders from './pages/user/Orders/MyOrders';
 import AdminHome from './pages/admin/Home/AdminHome';
 import AddProduct from './pages/admin/Products/AddProduct';
 import AdminProducts from './pages/admin/Products/AdminProducts';
+import AdminProductView from './pages/admin/Products/AdminProductView';
+import EditProduct from './pages/admin/Products/EditProduct';
 import AdminOrders from './pages/admin/Orders/AdminOrders';
 import AdminCustomers from './pages/admin/Customers/AdminCustomers';
 import AdminReviews from './pages/admin/Reviews/AdminReviews';
@@ -36,7 +38,7 @@ const Layout = ({ children }) => {
 
   const noNavRoutes = ['/login', '/signup'];
   const noFooterRoutes = ['/login', '/signup', '/cart'];
-  const adminRoutes = ['/admin', '/admin/add-product', '/admin/orders', '/admin/products', '/admin/reviews', '/admin/customers', '/admin/profile'];
+  const adminRoutes = ['/admin', '/admin/add-product', '/admin/orders', '/admin/products', '/admin/reviews', '/admin/customers', '/admin/profile', '/admin/product', '/admin/edit-product'];
 
   const isAdminRoute = adminRoutes.some(route => location.pathname.startsWith(route));
   const showNavbar = !noNavRoutes.includes(location.pathname) && !isAdminRoute;
@@ -125,6 +127,22 @@ function App() {
                 element={
                   <AdminRoute>
                     <AdminProducts />
+                  </AdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/product/:id" 
+                element={
+                  <AdminRoute>
+                    <AdminProductView />
+                  </AdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/edit-product/:id" 
+                element={
+                  <AdminRoute>
+                    <EditProduct />
                   </AdminRoute>
                 } 
               />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../../../config/firebase';
 import { Link } from 'react-router-dom';
+import { db } from '../../../config/firebase';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -113,13 +113,13 @@ const AdminProducts = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${product.price}
+                      LKR {product.price}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        product.stockQuantity > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                        {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                        {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : 'Out of stock'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -128,7 +128,7 @@ const AdminProducts = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <Link
-                          to={`/product/${product.id}`}
+                          to={`/admin/product/${product.id}`}
                           className="text-[#DDBB92] hover:text-[#B8A082]"
                         >
                           View
