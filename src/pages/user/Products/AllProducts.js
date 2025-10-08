@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { db } from '../../../config/firebase';
-import { X } from "lucide-react";
+import { X, CheckCircle, AlertCircle } from "lucide-react";
 import { Listbox } from "@headlessui/react";
+import { useCart } from '../../../contexts/CartContext';
 
 const AllProducts = () => {
   // 🔹 State
@@ -14,6 +15,30 @@ const AllProducts = () => {
   const [appliedFilters, setAppliedFilters] = useState([]);
   const [sortBy, setSortBy] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+  const [notification, setNotification] = useState(null);
+  
+  // 🔹 Cart context
+  const { addToCart } = useCart();
+
+  // 🔹 Notification functions
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  // 🔹 Cart handling function
+  const handleAddToCart = (product, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      addToCart(product);
+      showNotification(`${product.name} added to cart successfully!`, 'success');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      showNotification('Failed to add product to cart', 'error');
+    }
+  };
 
   // 🔹 Sort options for dropdown
   const sortOptions = [
@@ -323,22 +348,44 @@ const AllProducts = () => {
                 <div className="lg:col-span-3 mt-6 lg:mt-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => (
-                      <Link key={product.id} to={`/product/${product.id}`} className="bg-white rounded-2xl shadow-sm block group">
-                        <div className="aspect-square bg-gray-100 p-4 overflow-hidden rounded-2xl">
-                          <img
-                            src={(Array.isArray(product.images) && (typeof product.images[0] === 'string' ? product.images[0] : product.images[0]?.url)) || '/placeholder-product.jpg'}
-                            alt={product.name}
-                            className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105 cursor-pointer"
-                          />
-                        </div>
+                      <div key={product.id} className="bg-white rounded-2xl shadow-sm group relative">
+                        {/* Stock warning */}
+                        {product.stock && product.stock > 0 && product.stock < 10 && (
+                          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-semibold z-10">
+                            Only {product.stock} items left
+                          </div>
+                        )}
+                        
+                        {/* Out of stock overlay */}
+                        {(!product.stock || product.stock === 0) && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-2xl z-10">
+                            <span className="text-white font-semibold">Out of Stock</span>
+                          </div>
+                        )}
+                        
+                        {/* Product image - clickable to navigate */}
+                        <Link to={`/product/${product.id}`} className="block">
+                          <div className="aspect-square bg-gray-100 p-4 overflow-hidden rounded-2xl">
+                            <img
+                              src={(Array.isArray(product.images) && (typeof product.images[0] === 'string' ? product.images[0] : product.images[0]?.url)) || '/placeholder-product.jpg'}
+                              alt={product.name}
+                              className="w-full h-full object-cover transform transition-transform duration-300 group-hover:scale-105 cursor-pointer"
+                            />
+                          </div>
+                        </Link>
+                        
                         <div className="p-6">
                           <h3 className="text-[#463c30] font-medium text-lg mb-1">{product.name}</h3>
                           <p className="text-[#463c30] text-lg font-semibold mb-4">LKR {product.price}</p>
-                          <button className="w-full bg-[#d4b998] text-[#463c30] hover:bg-[#ddbb92] rounded-full font-medium py-2">
-                            Add to cart
+                          <button 
+                            onClick={(e) => handleAddToCart(product, e)}
+                            disabled={!product.stock || product.stock === 0}
+                            className="w-full bg-[#d4b998] text-[#463c30] hover:bg-[#ddbb92] rounded-full font-medium py-2 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors"
+                          >
+                            {!product.stock || product.stock === 0 ? 'Out of Stock' : 'Add to cart'}
                           </button>
                         </div>
-                      </Link>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -347,6 +394,30 @@ const AllProducts = () => {
           </div>
         </section>
       </div>
+      
+      {/* Notification Popup */}
+      {notification && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in">
+          <div className={`flex items-center space-x-3 px-6 py-4 rounded-lg shadow-lg max-w-sm ${
+            notification.type === 'success' 
+              ? 'bg-green-500 text-white' 
+              : 'bg-red-500 text-white'
+          }`}>
+            {notification.type === 'success' ? (
+              <CheckCircle className="w-6 h-6 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="w-6 h-6 flex-shrink-0" />
+            )}
+            <p className="text-sm font-medium">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="ml-2 text-white hover:text-gray-200 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
