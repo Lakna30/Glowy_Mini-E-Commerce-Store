@@ -96,14 +96,14 @@ const ShoppingCart = () => {
                 
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>${(getTotalPrice() * 0.08).toFixed(2)}</span>
+                  <span>LKR {(getTotalPrice() * 0.08).toFixed(2)}</span>
                 </div>
                 
                 <hr className="my-4" />
                 
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
-                  <span>${(getTotalPrice() * 1.08).toFixed(2)}</span>
+                  <span>LKR {(getTotalPrice() * 1.08).toFixed(2)}</span>
                 </div>
               </div>
 

@@ -16,10 +16,23 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
     <div className="cart-item flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
       <div className="flex-shrink-0">
         <img
-          src={(Array.isArray(item.images) && (typeof item.images[0] === 'string' ? item.images[0] : item.images[0]?.url)) || (typeof item.imageUrl === 'string' ? item.imageUrl : '/placeholder-product.jpg')}
+          src={
+            // Try imageUrl first (from CartContext), then fallback to images array
+            (typeof item.imageUrl === 'string' && item.imageUrl !== '/placeholder-product.jpg' 
+              ? item.imageUrl 
+              : (Array.isArray(item.images) && item.images.length > 0
+                  ? (typeof item.images[0] === 'string' 
+                      ? item.images[0] 
+                      : item.images[0]?.url)
+                  : '/placeholder-product.jpg')
+            ) || '/placeholder-product.jpg'
+          }
           alt={item.name}
           className="w-20 h-20 object-cover rounded-lg"
-          onError={e => { e.target.onerror = null; e.target.src = '/placeholder-product.jpg'; }}
+          onError={e => { 
+            e.target.onerror = null; 
+            e.target.src = '/placeholder-product.jpg'; 
+          }}
         />
       </div>
       

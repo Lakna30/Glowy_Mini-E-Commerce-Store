@@ -27,11 +27,28 @@ export function CartProvider({ children }) {
   }, [cartItems]);
 
   const addToCart = (product, quantity = 1, selectedSize = '', selectedColor = '') => {
+    // Handle both Cloudinary object format and direct URL string format
+    const getImageUrl = (images) => {
+      if (!Array.isArray(images) || images.length === 0) {
+        return '/placeholder-product.jpg';
+      }
+      
+      const firstImage = images[0];
+      if (typeof firstImage === 'string') {
+        return firstImage;
+      } else if (firstImage && typeof firstImage === 'object' && firstImage.url) {
+        return firstImage.url;
+      }
+      
+      return '/placeholder-product.jpg';
+    };
+
     const cartItem = {
       id: product.id,
       name: product.name,
       price: product.price,
-      imageUrl: product.images?.[0] || '/placeholder-product.jpg',
+      imageUrl: getImageUrl(product.images),
+      images: product.images, // Keep original images array for fallback
       brand: product.brand,
       selectedSize,
       selectedColor,

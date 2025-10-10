@@ -198,7 +198,7 @@ const Product = () => {
           className="w-full h-32 p-4 bg-[#E3D5C5] text-[#83715E] rounded-xl border border-[#bfa57f] focus:outline-none focus:border-[#3b332b] mb-4"
         ></textarea>
 
-        <button className="bg-[#D4B998] text-[#3b332b] w-full py-3 rounded-full font-serif font-semibold hover:bg-[#e1caa5] transition">
+        <button className="bg-[#D4B998] text-[#3b332b] w-full py-3 rounded-full font-semibold hover:bg-[#e1caa5] transition">
           Submit
         </button>
         <button

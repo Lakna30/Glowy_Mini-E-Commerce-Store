@@ -66,11 +66,14 @@ const CartDrawer = ({ isOpen, onClose }) => {
               {/* Robust product image logic for cart drawer */}
 <img
   src={
-    (Array.isArray(product.images) && product.images.length > 0
-      ? (typeof product.images[0] === 'string'
-          ? product.images[0]
-          : (product.images[0] && product.images[0].url) || null)
-      : (typeof product.imageUrl === 'string' && product.imageUrl)
+    // Try imageUrl first (from CartContext), then fallback to images array
+    (typeof product.imageUrl === 'string' && product.imageUrl !== '/placeholder-product.jpg' 
+      ? product.imageUrl 
+      : (Array.isArray(product.images) && product.images.length > 0
+          ? (typeof product.images[0] === 'string' 
+              ? product.images[0] 
+              : product.images[0]?.url)
+          : '/placeholder-product.jpg')
     ) || '/placeholder-product.jpg'
   }
   alt={product.name}
