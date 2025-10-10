@@ -209,11 +209,11 @@ const AdminOrders = () => {
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </span>
                     <span className="text-lg font-semibold">
-                      ${order.total?.toFixed(2)}
+                      LKR {order.total?.toFixed(2)}
                     </span>
                     <button
                       onClick={() => setSelectedOrder(order)}
-                      className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors"
+                      className="px-4 py-2 bg-[#DDBB92] text-[#2B2A29] rounded-md hover:opacity-90 transition-colors"
                     >
                       View Details
                     </button>
@@ -287,7 +287,7 @@ const AdminOrders = () => {
                           {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
                         </span>
                       </p>
-                      <p><span className="font-medium">Total:</span> ${selectedOrder.total?.toFixed(2)}</p>
+                      <p><span className="font-medium">Total:</span> LKR {selectedOrder.total?.toFixed(2)}</p>
                     </div>
 
                     {/* Status Update */}
@@ -300,8 +300,8 @@ const AdminOrders = () => {
                             onClick={() => updateOrderStatus(selectedOrder.id, status)}
                             className={`px-3 py-1 rounded text-sm ${
                               selectedOrder.status === status
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                ? 'bg-[#DDBB92] text-[#2B2A29] hover:opacity-90 transition-colors'
+                                : 'bg-gray-200 text-gray-700 hover:opacity-70 transition-colors'
                             }`}
                           >
                             {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -344,8 +344,8 @@ const AdminOrders = () => {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
-                          <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
+                          <p className="font-semibold">LKR {(item.price * item.quantity).toFixed(2)}</p>
+                          <p className="text-sm text-gray-600">LKR {item.price.toFixed(2)} each</p>
                         </div>
                       </div>
                     ))}

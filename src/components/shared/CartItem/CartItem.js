@@ -70,16 +70,16 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
           
           <div className="text-right">
             <p className="font-semibold text-lg">
-              ${formatPrice(item.price * item.quantity)}
+              LKR {formatPrice(item.price * item.quantity)}
             </p>
             <p className="text-sm text-gray-600">
-              ${formatPrice(item.price)} each
+              LKR {formatPrice(item.price)} each
             </p>
           </div>
         </div>
       </div>
       
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 self-start mt-0">
         <button
           onClick={() => onRemove(item.id, item.selectedSize, item.selectedColor)}
           className="text-red-600 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
