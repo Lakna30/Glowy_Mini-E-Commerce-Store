@@ -20,7 +20,7 @@ const ConfirmOrder = () => {
     city: '',
     state: '',
     zipCode: '',
-    country: 'United States',
+    country: 'Sri Lanka',
     paymentMethod: 'credit-card',
     cardNumber: '',
     expiryDate: '',

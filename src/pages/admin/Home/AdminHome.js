@@ -122,7 +122,7 @@ const AdminHome = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-semibold text-gray-900">${stats.totalRevenue.toFixed(2)}</p>
+                <p className="text-2xl font-semibold text-gray-900">LKR {stats.totalRevenue.toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -175,7 +175,7 @@ const AdminHome = () => {
                       <p className="text-sm text-gray-600">{formatDate(order.createdAt)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">${order.total?.toFixed(2)}</p>
+                      <p className="font-semibold">LKR {order.total?.toFixed(2)}</p>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>

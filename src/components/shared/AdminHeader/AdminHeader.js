@@ -80,7 +80,7 @@ const AdminHeader = () => {
   const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-gray-100 border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         {/* Search Bar */}
         <div className="flex-1 max-w-md">
