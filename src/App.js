@@ -12,8 +12,8 @@ import AllProducts from './pages/user/Products/AllProducts';
 import Product from './pages/user/Products/Product';
 import ShoppingCart from './pages/user/Cart/ShoppingCart';
 import ConfirmOrder from './pages/user/Orders/ConfirmOrder';
-import OrderHistory from './pages/user/Orders/OrderHistory';
 import MyOrders from './pages/user/Orders/MyOrders';
+import UserProfile from './pages/user/Profile/Profile';
 
 // Admin Pages
 import AdminHome from './pages/admin/Home/AdminHome';
@@ -85,10 +85,10 @@ function App() {
                 } 
               />
               <Route 
-                path="/order-history" 
+                path="/my-profile" 
                 element={
                   <ProtectedRoute>
-                    <OrderHistory />
+                    <UserProfile />
                   </ProtectedRoute>
                 } 
               />

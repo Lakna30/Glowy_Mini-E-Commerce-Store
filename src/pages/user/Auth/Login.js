@@ -4,6 +4,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { isAdminEmail } from '../../../constants/admin';
 import { Eye, EyeOff, Mail, ArrowRight} from "lucide-react";
 
+const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
