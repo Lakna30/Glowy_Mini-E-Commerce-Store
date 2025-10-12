@@ -3,7 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import { useCart } from "../../../contexts/CartContext";
-import { Heart, ShoppingCart, ChevronLeft } from "lucide-react";
+import { Heart, ShoppingCart, ChevronLeft, X, CheckCircle, AlertCircle } from "lucide-react";
+
+const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
 
 const Product = () => {
   const { id } = useParams();
@@ -12,7 +14,15 @@ const Product = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedRating, setSelectedRating] = useState(0);
+  const [notification, setNotification] = useState(null); // 🔹 added
 
+  // 🔹 Notification popup
+  const showNotification = (message, type = "success") => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  // 🔹 Fetch product
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -46,9 +56,7 @@ const Product = () => {
   if (!product) {
     return (
       <div className="bg-[#484139] text-center text-[#D4B998] h-screen flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-serif font-bold mb-4">
-          Product not found
-        </h1>
+        <h1 className="text-2xl font-serif font-bold mb-4">Product not found</h1>
         <button
           onClick={() => navigate("/products")}
           className="bg-[#D4B998] text-[#3b332b] px-6 py-3 rounded-lg font-semibold"
@@ -59,10 +67,20 @@ const Product = () => {
     );
   }
 
+  // 🔹 Add to cart with popup
+  const handleAddToCart = () => {
+    try {
+      addToCart(product, 1);
+      showNotification(`${product.name} added to cart successfully!`, "success");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      showNotification("Failed to add product to cart", "error");
+    }
+  };
+
   return (
-    <div className="bg-[#484139] min-h-screen flex flex-col items-center text-[#D4B998] px-6 py-10">
-      
-      {/* Back Navigation Icon */}
+    <div className={`${gradientClass} min-h-screen flex flex-col items-center text-[#D4B998] px-6 py-10`}>
+      {/* Back Icon */}
       <div
         onClick={() => navigate("/products")}
         className="absolute top-30 left-7 cursor-pointer opacity-80 hover:opacity-100 transition-all duration-200"
@@ -74,24 +92,19 @@ const Product = () => {
         />
       </div>
 
-      {/* Centered container */}
+      {/* Product Section */}
       <div className="max-w-7xl w-full flex flex-col lg:flex-row gap-12 items-stretch justify-between max-h-[600px]">
         {/* Product Info */}
         <div className="bg-[#D4B998] text-[#463C30] rounded-3xl p-8 shadow-xl w-full lg:w-1/3 flex flex-col">
           <h1 className="text-4xl font-domine font-bold mb-4">{product.name}</h1>
-          <p className="text-lg text-[#463C30] mb-4">
-            {product.description || "No description available."}
-          </p>
+          <p className="text-lg text-[#463C30] mb-4">{product.description || "No description available."}</p>
 
-          <div className="text-3xl font-bold mb-4">
-            LKR {product.price?.toFixed(2)}
-          </div>
+          <div className="text-3xl font-bold mb-4">LKR {product.price?.toFixed(2)}</div>
 
+          {/* Rating Display */}
           <div className="flex items-center gap-1 mb-6">
             {(() => {
-              const displayRating = Math.round(
-                Number(product?.rating ?? product?.avgRating ?? 0)
-              );
+              const displayRating = Math.round(Number(product?.rating ?? product?.avgRating ?? 0));
               return [...Array(5)].map((_, i) => (
                 <svg
                   key={i}
@@ -110,14 +123,17 @@ const Product = () => {
 
           <div className="flex items-center justify-end mt-auto">
             <button
-              onClick={() => addToCart({ ...product, quantity: 1 })}
+              onClick={() => navigate("/confirm-order", { state: { product, quantity: 1 } })}
               className="bg-[#463C30] text-[#D4B998] px-8 py-3 rounded-xl font-semibold text-lg hover:bg-[#2e2821] transition mr-20"
             >
               Buy Now
             </button>
 
             <div className="flex items-center gap-4">
-              <button className="w-14 h-14 flex items-center justify-center bg-[#463C30] text-[#D4B998] rounded-xl hover:bg-[#2e2821] transition">
+              <button
+                onClick={handleAddToCart}
+                className="w-14 h-14 flex items-center justify-center bg-[#463C30] text-[#D4B998] rounded-xl hover:bg-[#2e2821] transition"
+              >
                 <ShoppingCart className="w-6 h-6" />
               </button>
               <button className="w-14 h-14 flex items-center justify-center bg-[#463C30] text-[#D4B998] rounded-xl hover:bg-[#2e2821] transition">
@@ -129,7 +145,6 @@ const Product = () => {
 
         {/* Product Images */}
         <div className="flex gap-4 w-full lg:w-2/3 flex-col lg:flex-row items-stretch">
-          {/* Main image */}
           <div className="flex-1">
             <img
               src={
@@ -144,7 +159,6 @@ const Product = () => {
             />
           </div>
 
-          {/* Thumbnails: only image index 1 & 2 */}
           {product.images && product.images.length > 2 && (
             <div className="flex flex-col gap-4 h-full justify-between">
               {[1, 2].map((index) => {
@@ -209,6 +223,32 @@ const Product = () => {
           Cancel
         </button>
       </div>
+
+      {/* 🔹 Notification Popup (same as AllProducts) */}
+      {notification && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in">
+          <div
+            className={`flex items-center space-x-3 px-6 py-4 rounded-lg shadow-lg max-w-sm ${
+              notification.type === "success"
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            {notification.type === "success" ? (
+              <CheckCircle className="w-6 h-6 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="w-6 h-6 flex-shrink-0" />
+            )}
+            <p className="text-sm font-medium">{notification.message}</p>
+            <button
+              onClick={() => setNotification(null)}
+              className="ml-2 text-white hover:text-gray-200 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
