@@ -4,6 +4,8 @@ import { useCart } from '../../../contexts/CartContext';
 import CartItem from '../../../components/shared/CartItem/CartItem';
 import { ChevronLeft } from "lucide-react";
 
+const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
+
 const ShoppingCart = () => {
   const { cartItems, updateQuantity, removeFromCart, clearCart, getTotalPrice, getTotalItems } = useCart();
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ const ShoppingCart = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-[#484139]">
+      <div className={`${gradientClass} min-h-screen flex items-center justify-center`}>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12 bg-[#E3D5C5] rounded-lg border border-[#83715E] shadow-md mx-auto max-w-xl">
             <div className="text-6xl mb-4">🛒</div>
@@ -41,7 +43,7 @@ const ShoppingCart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#484139]">
+    <div className={`${gradientClass} min-h-screen`}>
       <div className="container mx-auto max-w-7xl py-8">
         <div className="mb-8 px-4">
           {/* Back Navigation Icon */}

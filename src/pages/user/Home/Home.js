@@ -1,11 +1,16 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
 
 const Home = () => {
+  const navigate = useNavigate();
+  
   return (
-    <div className="home min-h-screen">
+    <div className={`${gradientClass} home min-h-screen`}> 
       {/* Main Hero Section */}
-      <div className="bg-[#484139] min-h-screen flex items-center justify-center relative">
+      <div className="min-h-screen flex items-center justify-center relative">
         <div className="container mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
@@ -37,7 +42,9 @@ const Home = () => {
               </p>
               
               {/* CTA Button */}
-              <button className="bg-[#DDBB92] text-[#2B2A29] px-8 py-4 rounded-full font-serif font-semibold text-lg hover:opacity-90 transition-colors duration-300 flex items-center space-x-2">
+              <button 
+                onClick={() => navigate('/products')}
+                className="bg-[#DDBB92] text-[#2B2A29] px-8 py-4 rounded-full font-serif font-semibold text-lg hover:opacity-90 transition-colors duration-300 flex items-center space-x-2">
                 <span>Explore more</span>
                 <ArrowRight className="w-5 h-5 translate-y-1" />
               </button>

@@ -122,7 +122,7 @@ const Navbar = () => {
                       : 'text-gray-300 hover:bg-[#E3D2BD] hover:text-[#2B2A29]'
                   }`}
                 >
-                  Contact us
+                  Contact Us
                 </Link>
               </>
             )}

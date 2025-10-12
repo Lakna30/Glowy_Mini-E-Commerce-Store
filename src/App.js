@@ -5,6 +5,7 @@ import { CartProvider } from './contexts/CartContext';
 
 // User Pages
 import Home from './pages/user/Home/Home';
+import About from './pages/user/About/About';
 import Login from './pages/user/Auth/Login';
 import Signup from './pages/user/Auth/Signup';
 import AllProducts from './pages/user/Products/AllProducts';
@@ -31,6 +32,7 @@ import Footer from './components/shared/Footer/Footer';
 import ProtectedRoute from './components/shared/ProtectedRoute/ProtectedRoute';
 import AdminRoute from './components/shared/AdminRoute/AdminRoute';
 import AdminLayout from './components/shared/AdminLayout/AdminLayout';
+import ContactUs from './pages/user/ContactUs/ContactUs';
 
 // Layout component
 const Layout = ({ children }) => {
@@ -67,11 +69,13 @@ function App() {
             <Routes>
               {/* User Routes */}
               <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/products" element={<AllProducts />} />
               <Route path="/product/:id" element={<Product />} />
               <Route path="/cart" element={<ShoppingCart />} />
+              <Route path="/contact" element={<ContactUs />} />
               <Route 
                 path="/confirm-order" 
                 element={

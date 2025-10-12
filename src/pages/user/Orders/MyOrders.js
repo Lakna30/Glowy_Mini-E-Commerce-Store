@@ -5,6 +5,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, X } from 'lucide-react';
 
+const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
+
 const MyOrders = () => {
   const { currentUser } = useAuth();
   const [orders, setOrders] = useState([]);
@@ -85,7 +87,7 @@ const MyOrders = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#484139]">
+    <div className={`${gradientClass} min-h-screen`}>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 pb-8 pt-8">

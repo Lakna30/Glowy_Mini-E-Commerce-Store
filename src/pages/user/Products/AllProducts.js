@@ -6,6 +6,8 @@ import { X, CheckCircle, AlertCircle } from "lucide-react";
 import { Listbox } from "@headlessui/react";
 import { useCart } from '../../../contexts/CartContext';
 
+const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
+
 const AllProducts = () => {
   // 🔹 State
   const [products, setProducts] = useState([]); 
@@ -148,7 +150,7 @@ const AllProducts = () => {
   // 🔹 Loading State
   if (loading) {
     return (
-      <div className="all-products">
+      <div className={`${gradientClass} all-products`}>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">Loading products...</div>
         </div>
@@ -157,7 +159,7 @@ const AllProducts = () => {
   }
 
   return (
-    <div className="all-products bg-[#484139]">
+    <div className={`${gradientClass} all-products`}>
       <div className="container mx-auto px-4 py-8">
 
         {/* Hero Section */}
