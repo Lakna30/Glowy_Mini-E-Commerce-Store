@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../../config/firebase";
 import { useCart } from "../../../contexts/CartContext";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useNotification } from "../../../contexts/NotificationContext";
 import { Heart, ShoppingCart, ChevronLeft, X, CheckCircle, AlertCircle } from "lucide-react";
 
 const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
@@ -11,16 +13,14 @@ const Product = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { currentUser } = useAuth();
+  const { showSuccess, showError } = useNotification();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedRating, setSelectedRating] = useState(0);
-  const [notification, setNotification] = useState(null); // 🔹 added
-
-  // 🔹 Notification popup
-  const showNotification = (message, type = "success") => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
+  const [reviews, setReviews] = useState([]);
+  const [reviewText, setReviewText] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   // 🔹 Fetch product
   useEffect(() => {
@@ -44,6 +44,97 @@ const Product = () => {
 
     if (id) fetchProduct();
   }, [id, navigate]);
+
+  // 🔹 Fetch reviews (only approved messages; star-only entries are always shown)
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!id) return;
+      
+      try {
+        const reviewsRef = collection(db, 'reviews');
+        // Avoid composite index requirement by not ordering in the query; sort client-side
+        const q = query(reviewsRef, where('productId', '==', id));
+        const querySnapshot = await getDocs(q);
+        const reviewsData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        // Filter: show only approved if there is a comment; star-only (no comment) are visible immediately
+        .filter(r => (r.comment && r.comment.trim().length > 0) ? r.approved === true : true)
+        // Sort by createdAt desc, handling missing timestamps gracefully
+        .sort((a, b) => {
+          const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
+          const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
+          return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
+        });
+        
+        setReviews(reviewsData);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      }
+    };
+
+    fetchReviews();
+  }, [id]);
+
+  // 🔹 Submit review (allow stars only, text only, or both)
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    
+    if (!currentUser) {
+      showError('Please log in to submit a review.');
+      return;
+    }
+
+    if (selectedRating === 0 && !reviewText.trim()) {
+      showError('Please add a star rating or write a review.');
+      return;
+    }
+
+    setSubmittingReview(true);
+
+    try {
+      const hasMessage = !!reviewText.trim();
+      const reviewData = {
+        productId: id,
+        userId: currentUser.uid,
+        userName: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
+        userEmail: currentUser.email,
+        rating: selectedRating || 0,
+        comment: hasMessage ? reviewText.trim() : '',
+        createdAt: serverTimestamp(),
+        // Star-only reviews are auto-approved; message reviews require admin approval
+        approved: hasMessage ? false : true
+      };
+
+      await addDoc(collection(db, 'reviews'), reviewData);
+      
+      showSuccess(hasMessage ? 'Review submitted! It will be visible after admin approval.' : 'Rating submitted successfully!');
+      
+      // Reset form
+      setSelectedRating(0);
+      setReviewText('');
+      
+      // Refresh reviews (same client-side sort to avoid index requirement)
+      const reviewsRef = collection(db, 'reviews');
+      const q = query(reviewsRef, where('productId', '==', id));
+      const querySnapshot = await getDocs(q);
+      const refreshed = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(r => (r.comment && r.comment.trim().length > 0) ? r.approved === true : true)
+        .sort((a, b) => {
+          const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
+          const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
+          return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
+        });
+      setReviews(refreshed);
+      
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      showError('Failed to submit review. Please try again.');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -71,10 +162,10 @@ const Product = () => {
   const handleAddToCart = () => {
     try {
       addToCart(product, 1);
-      showNotification(`${product.name} added to cart successfully!`, "success");
+      showSuccess(`${product.name} added to cart successfully!`);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      showNotification("Failed to add product to cart", "error");
+      showError("Failed to add product to cart");
     }
   };
 
@@ -180,9 +271,49 @@ const Product = () => {
       {/* Reviews Section */}
       <div className="mt-14 rounded-3xl p-8 text-[#E3D5C5] w-full max-w-6xl">
         <h2 className="text-3xl font-serif font-bold mb-4">Reviews</h2>
-        <p className="mb-6">No reviews</p>
+        
+        {reviews.length > 0 ? (
+          <div className="space-y-4 mb-6">
+            {reviews.map((review) => (
+              <div key={review.id} className="bg-[#E3D5C5] bg-opacity-20 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-semibold text-[#E3D5C5]">{review.userName}</span>
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className={`w-4 h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-400'}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                  </div>
+                  <span className="text-sm text-[#E3D5C5] opacity-70">
+                    {review.createdAt?.toDate ? review.createdAt.toDate().toLocaleDateString() : 'Recently'}
+                  </span>
+                </div>
+                <p className="text-[#E3D5C5]">{review.comment}</p>
+                {review.status === 'pending' && (
+                  <span className="text-xs text-yellow-400 mt-2 block">Pending approval</span>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mb-6">No reviews yet</p>
+        )}
 
         <h3 className="text-2xl font-serif font-bold mb-4">Write a review</h3>
+        
+        {!currentUser && (
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+            Please log in to write a review.
+          </div>
+        )}
 
         <div className="flex items-center gap-2 mb-4">
           {[...Array(5)].map((_, i) => (
@@ -207,14 +338,30 @@ const Product = () => {
           ))}
         </div>
 
-        <textarea
-          placeholder="Write a review"
-          className="w-full h-32 p-4 bg-[#E3D5C5] text-[#83715E] rounded-xl border border-[#bfa57f] focus:outline-none focus:border-[#3b332b] mb-4"
-        ></textarea>
+        <form onSubmit={handleSubmitReview}>
+          <textarea
+            placeholder="Write a review"
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+            className="w-full h-32 p-4 bg-[#E3D5C5] text-[#83715E] rounded-xl border border-[#bfa57f] focus:outline-none focus:border-[#3b332b] mb-4"
+            required
+          ></textarea>
 
-        <button className="bg-[#D4B998] text-[#3b332b] w-full py-3 rounded-full font-semibold hover:bg-[#e1caa5] transition">
-          Submit
-        </button>
+          <button 
+            type="submit"
+            disabled={submittingReview || !currentUser}
+            className="bg-[#D4B998] text-[#3b332b] w-full py-3 rounded-full font-semibold hover:bg-[#e1caa5] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            {submittingReview ? (
+              <>
+                <div className="w-4 h-4 border-2 border-[#3b332b] border-t-transparent rounded-full animate-spin"></div>
+                <span>Submitting...</span>
+              </>
+            ) : (
+              'Submit Review'
+            )}
+          </button>
+        </form>
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -224,31 +371,6 @@ const Product = () => {
         </button>
       </div>
 
-      {/* 🔹 Notification Popup (same as AllProducts) */}
-      {notification && (
-        <div className="fixed top-4 right-4 z-50 animate-slide-in">
-          <div
-            className={`flex items-center space-x-3 px-6 py-4 rounded-lg shadow-lg max-w-sm ${
-              notification.type === "success"
-                ? "bg-green-500 text-white"
-                : "bg-red-500 text-white"
-            }`}
-          >
-            {notification.type === "success" ? (
-              <CheckCircle className="w-6 h-6 flex-shrink-0" />
-            ) : (
-              <AlertCircle className="w-6 h-6 flex-shrink-0" />
-            )}
-            <p className="text-sm font-medium">{notification.message}</p>
-            <button
-              onClick={() => setNotification(null)}
-              className="ml-2 text-white hover:text-gray-200 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

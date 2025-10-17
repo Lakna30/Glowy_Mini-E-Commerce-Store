@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../../../contexts/CartContext';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useNotification } from '../../../contexts/NotificationContext';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
 import { ChevronLeft } from "lucide-react";
@@ -9,7 +10,13 @@ import { ChevronLeft } from "lucide-react";
 const ConfirmOrder = () => {
   const { cartItems, getTotalPrice, clearCart } = useCart();
   const { currentUser } = useAuth();
+  const { showSuccess, showError } = useNotification();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Handle Buy Now flow - single product purchase
+  const [buyNowProduct, setBuyNowProduct] = useState(null);
+  const [buyNowQuantity, setBuyNowQuantity] = useState(1);
   
   const [formData, setFormData] = useState({
     firstName: currentUser?.displayName?.split(' ')[0] || '',
@@ -35,6 +42,35 @@ const ConfirmOrder = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Check if this is a Buy Now flow
+  useEffect(() => {
+    if (location.state?.product) {
+      setBuyNowProduct(location.state.product);
+      setBuyNowQuantity(location.state.quantity || 1);
+    }
+  }, [location.state]);
+
+  // Get items for order (either cart items or single product)
+  const getOrderItems = () => {
+    if (buyNowProduct) {
+      return [{
+        ...buyNowProduct,
+        quantity: buyNowQuantity,
+        selectedSize: buyNowProduct.selectedSize || null,
+        selectedColor: buyNowProduct.selectedColor || null
+      }];
+    }
+    return cartItems;
+  };
+
+  // Get total price
+  const getOrderTotal = () => {
+    if (buyNowProduct) {
+      return buyNowProduct.price * buyNowQuantity;
+    }
+    return getTotalPrice();
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -49,11 +85,14 @@ const ConfirmOrder = () => {
     setError('');
 
     try {
+      const orderItems = getOrderItems();
+      const orderTotal = getOrderTotal();
+      
       // Create order document
       const orderData = {
         userId: currentUser.uid,
         userEmail: currentUser.email,
-        items: cartItems,
+        items: orderItems,
         shippingAddress: {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -83,9 +122,9 @@ const ConfirmOrder = () => {
           country: formData.country
         },
         paymentMethod: formData.paymentMethod,
-        subtotal: getTotalPrice(),
+        subtotal: orderTotal,
         shipping: 350,
-        total: getTotalPrice() + 350,
+        total: orderTotal + 350,
         status: 'pending',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -93,21 +132,26 @@ const ConfirmOrder = () => {
 
       const docRef = await addDoc(collection(db, 'orders'), orderData);
       
-      // Clear cart
-      clearCart();
+      // Clear cart only if not Buy Now flow
+      if (!buyNowProduct) {
+        clearCart();
+      }
+      
+      showSuccess('Order placed successfully!');
       
       // Redirect to order confirmation
       navigate(`/order-confirmation/${docRef.id}`);
       
     } catch (error) {
       console.error('Error creating order:', error);
+      showError('Failed to place order. Please try again.');
       setError('Failed to place order. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && !buyNowProduct) {
     return (
       <div className="confirm-order">
         <div className="container mx-auto px-4 py-8">
@@ -274,7 +318,7 @@ const ConfirmOrder = () => {
                 <h2 className="text-xl text-[#463C30] font-bold mb-4">Order Summary</h2>
                 
                 <div className="space-y-3">
-                  {cartItems.map((item) => (
+                  {getOrderItems().map((item) => (
                     <div key={`${item.id}-${item.selectedSize}-${item.selectedColor}`} className="flex justify-between items-center">
                       <div className="flex-1">
                         <h4 className="font-medium">{item.name}</h4>
@@ -296,7 +340,7 @@ const ConfirmOrder = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>LKR {getTotalPrice().toFixed(2)}</span>
+                    <span>LKR {getOrderTotal().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
@@ -305,7 +349,7 @@ const ConfirmOrder = () => {
                   <hr />
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total</span>
-                    <span>LKR {(getTotalPrice() + 350).toFixed(2)}</span>
+                    <span>LKR {(getOrderTotal() + 350).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
