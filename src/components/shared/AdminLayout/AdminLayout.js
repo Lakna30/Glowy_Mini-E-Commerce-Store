@@ -1,6 +1,8 @@
 import React from 'react';
 import AdminSidebar from '../AdminSidebar/AdminSidebar';
 import AdminHeader from '../AdminHeader/AdminHeader';
+import NotificationContainer from '../NotificationContainer/NotificationContainer';
+import ConfirmationContainer from '../ConfirmationContainer/ConfirmationContainer';
 
 const AdminLayout = ({ children }) => {
   return (
@@ -20,6 +22,8 @@ const AdminLayout = ({ children }) => {
           </div>
         </main>
       </div>
+      <NotificationContainer />
+      <ConfirmationContainer />
     </div>
   );
 };

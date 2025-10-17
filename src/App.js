@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { ConfirmationProvider } from './contexts/ConfirmationContext';
 
 // User Pages
 import Home from './pages/user/Home/Home';
@@ -12,6 +14,7 @@ import AllProducts from './pages/user/Products/AllProducts';
 import Product from './pages/user/Products/Product';
 import ShoppingCart from './pages/user/Cart/ShoppingCart';
 import ConfirmOrder from './pages/user/Orders/ConfirmOrder';
+import OrderConfirmation from './pages/user/Orders/OrderConfirmation';
 import MyOrders from './pages/user/Orders/MyOrders';
 import UserProfile from './pages/user/Profile/Profile';
 
@@ -24,6 +27,7 @@ import EditProduct from './pages/admin/Products/EditProduct';
 import AdminOrders from './pages/admin/Orders/AdminOrders';
 import AdminCustomers from './pages/admin/Customers/AdminCustomers';
 import AdminReviews from './pages/admin/Reviews/AdminReviews';
+import AdminNotifications from './pages/admin/Notifications/AdminNotifications';
 import AdminProfile from './pages/admin/Profile/AdminProfile';
 
 // Shared Components
@@ -33,6 +37,8 @@ import ProtectedRoute from './components/shared/ProtectedRoute/ProtectedRoute';
 import AdminRoute from './components/shared/AdminRoute/AdminRoute';
 import AdminLayout from './components/shared/AdminLayout/AdminLayout';
 import ContactUs from './pages/user/ContactUs/ContactUs';
+import NotificationContainer from './components/shared/NotificationContainer/NotificationContainer';
+import ConfirmationContainer from './components/shared/ConfirmationContainer/ConfirmationContainer';
 
 // Layout component
 const Layout = ({ children }) => {
@@ -56,6 +62,8 @@ const Layout = ({ children }) => {
       {showNavbar && <Navbar />}
       <main>{children}</main>
       {showFooter && <Footer />}
+      <NotificationContainer />
+      <ConfirmationContainer />
     </div>
   );
 };
@@ -64,7 +72,9 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <Router>
+        <NotificationProvider>
+          <ConfirmationProvider>
+            <Router>
           <Layout>
             <Routes>
               {/* User Routes */}
@@ -76,6 +86,14 @@ function App() {
               <Route path="/product/:id" element={<Product />} />
               <Route path="/cart" element={<ShoppingCart />} />
               <Route path="/contact" element={<ContactUs />} />
+              <Route 
+                path="/order-confirmation/:orderId" 
+                element={
+                  <ProtectedRoute>
+                    <OrderConfirmation />
+                  </ProtectedRoute>
+                } 
+              />
               <Route 
                 path="/confirm-order" 
                 element={
@@ -174,9 +192,19 @@ function App() {
                   </AdminRoute>
                 } 
               />
+              <Route 
+                path="/admin/notifications" 
+                element={
+                  <AdminRoute>
+                    <AdminNotifications />
+                  </AdminRoute>
+                } 
+              />
             </Routes>
           </Layout>
-        </Router>
+            </Router>
+          </ConfirmationProvider>
+        </NotificationProvider>
       </CartProvider>
     </AuthProvider>
   );

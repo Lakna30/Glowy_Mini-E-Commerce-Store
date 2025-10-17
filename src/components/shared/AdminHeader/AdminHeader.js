@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useNotification } from '../../../contexts/NotificationContext';
+import { useConfirmation } from '../../../contexts/ConfirmationContext';
 import { Search, Bell, User, Settings, LogOut } from 'lucide-react';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -7,16 +9,30 @@ import { db } from '../../../config/firebase';
 
 const AdminHeader = () => {
   const { currentUser, logout } = useAuth();
+  const { showSuccess, showError } = useNotification();
+  const { showConfirmation } = useConfirmation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef(null);
 
   const handleLogout = async () => {
+    const confirmed = await showConfirmation({
+      title: 'Logout',
+      message: 'Are you sure you want to logout? You will need to sign in again to access the admin panel.',
+      confirmText: 'Yes, Logout',
+      cancelText: 'Stay Logged In',
+      type: 'logout'
+    });
+
+    if (!confirmed) return;
+
     try {
       await logout();
+      showSuccess('Logged out successfully!');
     } catch (error) {
       console.error('Failed to log out:', error);
+      showError('Failed to logout. Please try again.');
     }
   };
 
@@ -26,13 +42,13 @@ const AdminHeader = () => {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file.');
+      showError('Please select an image file.');
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB.');
+      showError('File size must be less than 5MB.');
       return;
     }
 
@@ -58,11 +74,11 @@ const AdminHeader = () => {
         photoURL: downloadURL
       });
 
-      alert('Profile picture uploaded successfully!');
+      showSuccess('Profile picture uploaded successfully!');
       setIsProfileOpen(false);
     } catch (error) {
       console.error('Error uploading profile picture:', error);
-      alert('Failed to upload profile picture. Please try again.');
+      showError('Failed to upload profile picture. Please try again.');
     }
   };
 
@@ -134,9 +150,9 @@ const AdminHeader = () => {
                   ))}
                 </div>
                 <div className="p-4 border-t border-gray-200">
-                  <button className="text-sm text-[#DDBB92] hover:text-[#B8A082] font-medium">
+                  <a href="/admin/notifications" className="text-sm text-[#DDBB92] hover:text-[#B8A082] font-medium">
                     View all notifications
-                  </button>
+                  </a>
                 </div>
               </div>
             )}

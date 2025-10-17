@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { db } from '../../../config/firebase';
+import { useNotification } from '../../../contexts/NotificationContext';
+import { useConfirmation } from '../../../contexts/ConfirmationContext';
 
 const AdminProducts = () => {
+  const { showSuccess, showError } = useNotification();
+  const { showConfirmation } = useConfirmation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingProduct, setDeletingProduct] = useState(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -27,14 +32,28 @@ const AdminProducts = () => {
     fetchProducts();
   }, []);
 
-  const handleDeleteProduct = async (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await deleteDoc(doc(db, 'products', productId));
-        setProducts(products.filter(product => product.id !== productId));
-      } catch (error) {
-        console.error('Error deleting product:', error);
-      }
+  const handleDeleteProduct = async (product) => {
+    const confirmed = await showConfirmation({
+      title: 'Delete Product',
+      message: `Are you sure you want to delete "${product.name}"? This action cannot be undone and will remove the product from the store permanently.`,
+      confirmText: 'Yes, Delete Product',
+      cancelText: 'Keep Product',
+      type: 'danger'
+    });
+
+    if (!confirmed) return;
+
+    setDeletingProduct(product.id);
+    
+    try {
+      await deleteDoc(doc(db, 'products', product.id));
+      setProducts(products.filter(p => p.id !== product.id));
+      showSuccess(`Product "${product.name}" deleted successfully!`);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      showError('Failed to delete product. Please try again.');
+    } finally {
+      setDeletingProduct(null);
     }
   };
 
@@ -134,10 +153,18 @@ const AdminProducts = () => {
                           View
                         </Link>
                         <button
-                          onClick={() => handleDeleteProduct(product.id)}
-                          className="text-red-600 hover:text-red-900"
+                          onClick={() => handleDeleteProduct(product)}
+                          disabled={deletingProduct === product.id}
+                          className="text-red-600 hover:text-red-900 disabled:text-red-300 disabled:cursor-not-allowed flex items-center space-x-1"
                         >
-                          Delete
+                          {deletingProduct === product.id ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                              <span>Deleting...</span>
+                            </>
+                          ) : (
+                            'Delete'
+                          )}
                         </button>
                       </div>
                     </td>

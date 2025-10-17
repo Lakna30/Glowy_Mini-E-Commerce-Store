@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useNotification } from '../../../contexts/NotificationContext';
 import { Eye, EyeOff, Mail, ArrowRight, User } from "lucide-react";
- 
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -11,63 +11,117 @@ const Signup = () => {
     password: '',
     confirmPassword: ''
   });
+
+  const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signup, googleSignIn } = useAuth();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useNotification();
+
+  // Validation rules
+  const validateField = (name, value) => {
+    let message = '';
+
+    switch (name) {
+      case 'fullName':
+        if (!value.trim()) message = 'Name is required';
+        break;
+      case 'email':
+        if (!value.trim()) message = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+          message = 'Invalid email format';
+        break;
+      case 'password':
+        if (!value) message = 'Password is required';
+        else if (value.length < 8)
+          message = 'Password must be at least 8 characters';
+        else if (!/[a-z]/.test(value))
+          message = 'Must contain a lowercase letter';
+        else if (!/[A-Z]/.test(value))
+          message = 'Must contain an uppercase letter';
+        else if (!/\d/.test(value))
+          message = 'Must contain a number';
+        else if (!/[!@#$%^&*]/.test(value))
+          message = 'Must contain a special character';
+        break;
+      case 'confirmPassword':
+        if (!value) message = 'Please confirm your password';
+        else if (value !== formData.password)
+          message = 'Passwords do not match';
+        break;
+      default:
+        break;
+    }
+    return message;
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const message = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: message }));
+  };
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+
+    // Clear error when user starts typing
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (formData.password !== formData.confirmPassword) {
-    return setError("Passwords do not match");
-  }
-
-  try {
-    setError("");
-    setLoading(true);
-
-    // Split name into first + last
-    const [firstName, ...rest] = (formData.fullName || "").split(" ");
-    const lastName = rest.join(" ");
-
-    // Create account with Auth (returns user)
-    const user = await signup(formData.email, formData.password, {
-      firstName,
-      lastName,
+    // Validate all fields
+    const newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      const message = validateField(key, formData[key]);
+      if (message) newErrors[key] = message;
     });
-    if (!user) throw new Error('Signup did not return a user');
 
-    alert("Account created successfully. Please log in.");
-    navigate("/login");
-  } catch (error) {
-    setError("Failed to create an account");
-    alert(`Failed to create an account. ${error?.message || 'Please try again.'}`);
-    console.error("Signup error:", error);
-  }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return; // prevent submission
+    }
 
-  setLoading(false);
-};
+    try {
+      setError('');
+      setLoading(true);
 
+      const [firstName, ...rest] = (formData.fullName || '').split(' ');
+      const lastName = rest.join(' ');
+
+      const user = await signup(formData.email, formData.password, {
+        firstName,
+        lastName,
+      });
+      if (!user) throw new Error('Signup did not return a user');
+
+      showSuccess('Account created successfully. Please log in.');
+      navigate('/login');
+    } catch (error) {
+      setError('Failed to create an account');
+      showError(`Failed to create an account. ${error?.message || 'Please try again.'}`);
+      console.error('Signup error:', error);
+    }
+
+    setLoading(false);
+  };
 
   const handleGoogle = async () => {
     try {
       await googleSignIn();
-      alert('Signed in with Google successfully.');
+      showSuccess('Signed in with Google successfully!');
       navigate('/');
     } catch (error) {
       console.error('Google sign-in error:', error);
       setError('Google sign-in failed');
-      alert('Google sign-in failed. Please try again.');
+      showError('Google sign-in failed. Please try again.');
     }
   };
 
@@ -75,7 +129,6 @@ const Signup = () => {
     <div className="min-h-screen flex bg-[#3c3530]">
       {/* Left Side */}
       <div className="flex-1 flex flex-col justify-center px-12 lg:px-20">
-        
         {/* Logo */}
         <div className="mb-10 mt-12">
           <img src="Logo.png" alt="Glowy Logo" className="h-14 object-contain" />
@@ -87,11 +140,10 @@ const Signup = () => {
             Start your journey
           </h2>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
             {/* Name Field */}
-            <div className="space-y-2">
-              <label htmlFor="name" style={{ color: "#e3d5c5" }}>
+            <div className="space-y-1">
+              <label htmlFor="name" style={{ color: '#e3d5c5' }}>
                 Name
               </label>
               <div className="relative">
@@ -99,21 +151,26 @@ const Signup = () => {
                 <input
                   id="name"
                   type="text"
-                  placeholder="Enter your name"
                   name="fullName"
+                  placeholder="Enter your name"
                   value={formData.fullName}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
-                  autoComplete="off"
-                  className="pl-12 pr-4 h-12 w-full rounded-full border-0 text-gray-800 placeholder:text-gray-600"
-                  style={{ backgroundColor: "#f0e7dc" }}
+                  className={`pl-12 pr-4 h-12 w-full rounded-full border-2 text-gray-800 placeholder:text-gray-600 ${
+                    errors.fullName ? 'border-red-500' : 'border-transparent'
+                  }`}
+                  style={{ backgroundColor: '#f0e7dc' }}
                 />
               </div>
+              {errors.fullName && (
+                <p className="text-red-500 text-sm pl-4">{errors.fullName}</p>
+              )}
             </div>
-            
+
             {/* Email */}
-            <div className="space-y-2">
-              <label htmlFor="email" style={{ color: "#e3d5c5" }}>
+            <div className="space-y-1">
+              <label htmlFor="email" style={{ color: '#e3d5c5' }}>
                 Email
               </label>
               <div className="relative">
@@ -124,30 +181,37 @@ const Signup = () => {
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
-                  autoComplete="off"
-                  className="pl-12 pr-4 h-12 w-full rounded-full border-0 text-gray-800 placeholder:text-gray-600"
-                  style={{ backgroundColor: "#f0e7dc" }}
+                  className={`pl-12 pr-4 h-12 w-full rounded-full border-2 text-gray-800 placeholder:text-gray-600 ${
+                    errors.email ? 'border-red-500' : 'border-transparent'
+                  }`}
+                  style={{ backgroundColor: '#f0e7dc' }}
                 />
               </div>
+              {errors.email && (
+                <p className="text-red-500 text-sm pl-4">{errors.email}</p>
+              )}
             </div>
 
             {/* Password */}
-            <div className="space-y-2">
-              <label htmlFor="password" style={{ color: "#e3d5c5" }}>
+            <div className="space-y-1">
+              <label htmlFor="password" style={{ color: '#e3d5c5' }}>
                 Password
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   name="password"
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
-                  autoComplete="off"
-                  className="pl-4 pr-12 h-12 w-full rounded-full border-0 text-gray-800 placeholder:text-gray-600"
-                  style={{ backgroundColor: "#f0e7dc" }}
+                  className={`pl-4 pr-12 h-12 w-full rounded-full border-2 text-gray-800 placeholder:text-gray-600 ${
+                    errors.password ? 'border-red-500' : 'border-transparent'
+                  }`}
+                  style={{ backgroundColor: '#f0e7dc' }}
                 />
                 <button
                   type="button"
@@ -157,24 +221,29 @@ const Signup = () => {
                   {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-sm pl-4">{errors.password}</p>
+              )}
             </div>
 
             {/* Confirm Password */}
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" style={{ color: "#e3d5c5" }}>
-                Confirm password
+            <div className="space-y-1">
+              <label htmlFor="confirmPassword" style={{ color: '#e3d5c5' }}>
+                Confirm Password
               </label>
               <div className="relative">
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   name="confirmPassword"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   required
-                  autoComplete="off"
-                  className="pl-4 pr-12 h-12 w-full rounded-full border-0 text-gray-800 placeholder:text-gray-600"
-                  style={{ backgroundColor: "#f0e7dc" }}
+                  className={`pl-4 pr-12 h-12 w-full rounded-full border-2 text-gray-800 placeholder:text-gray-600 ${
+                    errors.confirmPassword ? 'border-red-500' : 'border-transparent'
+                  }`}
+                  style={{ backgroundColor: '#f0e7dc' }}
                 />
                 <button
                   type="button"
@@ -184,6 +253,9 @@ const Signup = () => {
                   {showConfirmPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </button>
               </div>
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm pl-4">{errors.confirmPassword}</p>
+              )}
             </div>
 
             {/* Signup Button */}
@@ -192,16 +264,15 @@ const Signup = () => {
                 type="submit"
                 disabled={loading}
                 className="w-full h-12 flex items-center justify-center rounded-full font-medium text-gray-900 hover:opacity-90 transition"
-                style={{ backgroundColor: "#e0c4a3" }}
+                style={{ backgroundColor: '#e0c4a3' }}
               >
-                {loading ? "Creating Account..." : "Signup"} <ArrowRight className="ml-2 w-5 h-5" />
+                {loading ? 'Creating Account...' : 'Signup'} <ArrowRight className="ml-2 w-5 h-5" />
               </button>
             </div>
           </form>
 
           {error && <p className="text-red-500 text-sm mt-3">{error}</p>}
 
-          {/* Divider */}
           <div className="text-center text-white/70 text-sm my-6">-OR-</div>
 
           {/* Social Login */}
@@ -215,19 +286,13 @@ const Signup = () => {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
             </button>
-
             {/* Facebook */}
-            <button
-              className="w-12 h-12 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors"
-              style={{ backgroundColor: "#1877f2" }}
-            >
-              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+            <button className="w-12 h-12 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors" style={{ backgroundColor: "#1877f2" }} >
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"> <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
             </button>
           </div>
 
-          {/* Login Link */}
           <div className="text-center">
             <span className="text-white/70 text-sm">Already have an account? </span>
             <Link to="/login" className="text-white font-medium text-sm hover:underline">
@@ -241,18 +306,15 @@ const Signup = () => {
       <div className="flex items-center justify-center p-8 lg:pr-20">
         <div className="bg-[#e0c4a3] rounded-3xl p-6 shadow-lg w-[600px]">
           <div className="relative flex flex-col items-center">
-            {/* Image */}
-            <img 
-              src="SignUpPic.png" 
-              alt="Skincare" 
+            <img
+              src="SignUpPic.png"
+              alt="Skincare"
               className="object-contain w-full h-auto rounded-xl mb-8"
               style={{ height: '600px', width: 'auto' }}
             />
-
-            {/* Quote Overlapping */}
             <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 translate-y-6 bg-[#fce9f5] rounded-xl p-4 shadow-md w-[100%]">
-              <p 
-                style={{ fontFamily: "'Source Serif Pro', serif" }} 
+              <p
+                style={{ fontFamily: "'Source Serif Pro', serif" }}
                 className="text-[#463C30] text-xl italic font-light leading-relaxed text-center"
               >
                 " Radiant skin reflects the care you invest in yourself. Nourish it, and let your natural beauty shine "

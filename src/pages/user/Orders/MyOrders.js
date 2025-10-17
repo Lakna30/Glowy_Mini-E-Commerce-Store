@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useNotification } from '../../../contexts/NotificationContext';
+import { useConfirmation } from '../../../contexts/ConfirmationContext';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, X } from 'lucide-react';
+import { ChevronLeft, X, XCircle } from 'lucide-react';
 
 const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
 
 const MyOrders = () => {
   const { currentUser } = useAuth();
+  const { showSuccess, showError } = useNotification();
+  const { showConfirmation } = useConfirmation();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [cancellingOrder, setCancellingOrder] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -78,6 +83,57 @@ const MyOrders = () => {
     return `ORD-${id.slice(-5).toUpperCase()}`;
   };
 
+  // Check if order can be cancelled (within 24 hours and status is pending)
+  const canCancelOrder = (order) => {
+    if (order.status !== 'pending') return false;
+    
+    const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+    const now = new Date();
+    const hoursDiff = (now - orderDate) / (1000 * 60 * 60);
+    
+    return hoursDiff <= 24;
+  };
+
+  // Cancel order function
+  const handleCancelOrder = async (order) => {
+    const confirmed = await showConfirmation({
+      title: 'Cancel Order',
+      message: `Are you sure you want to cancel order ${formatOrderId(order.id)}? This action cannot be undone and you will receive a full refund.`,
+      confirmText: 'Yes, Cancel Order',
+      cancelText: 'Keep Order',
+      type: 'cancel'
+    });
+
+    if (!confirmed) return;
+
+    setCancellingOrder(order.id);
+    
+    try {
+      const orderRef = doc(db, 'orders', order.id);
+      await updateDoc(orderRef, {
+        status: 'cancelled',
+        cancelledAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      // Update local state
+      setOrders(prevOrders => 
+        prevOrders.map(o => 
+          o.id === order.id 
+            ? { ...o, status: 'cancelled', cancelledAt: new Date() }
+            : o
+        )
+      );
+
+      showSuccess('Order cancelled successfully! You will receive a full refund within 3-5 business days.');
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      showError('Failed to cancel order. Please try again or contact support.');
+    } finally {
+      setCancellingOrder(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#B8A082] flex items-center justify-center">
@@ -129,12 +185,37 @@ const MyOrders = () => {
                         LKR {order.total?.toFixed(2) || '0.00'}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <button 
-                          onClick={() => setSelectedOrder(order)}
-                          className="bg-[#DDBB92] hover:bg-[#d4b998] text-[#2B2A29] px-4 py-2 rounded-xl text-sm font-medium transition-colors"
-                        >
-                          View Details
-                        </button>
+                        <div className="grid justify-center gap-2 min-w-[240px] [grid-template-columns:140px_100px]">
+                          {/* View Details column (fixed width) */}
+                          <button 
+                            onClick={() => setSelectedOrder(order)}
+                            className="bg-[#DDBB92] hover:bg-[#d4b998] text-[#2B2A29] w-[140px] px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+                          >
+                            View Details
+                          </button>
+                          {/* Cancel column (fixed width). Render invisible placeholder when not cancellable */}
+                          {canCancelOrder(order) ? (
+                            <button
+                              onClick={() => handleCancelOrder(order)}
+                              disabled={cancellingOrder === order.id}
+                              className="bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white w-[100px] px-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center justify-center space-x-1"
+                            >
+                              {cancellingOrder === order.id ? (
+                                <>
+                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                  <span>Wait</span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="w-4 h-4" />
+                                  <span>Cancel</span>
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <span className="w-[100px] px-3 py-2 rounded-xl invisible select-none">placeholder</span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -287,6 +368,28 @@ const MyOrders = () => {
                 >
                   Close
                 </button>
+                {canCancelOrder(selectedOrder) && (
+                  <button
+                    onClick={() => {
+                      setSelectedOrder(null);
+                      handleCancelOrder(selectedOrder);
+                    }}
+                    disabled={cancellingOrder === selectedOrder.id}
+                    className="bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white px-6 py-3 rounded-xl font-medium transition-colors flex items-center space-x-2"
+                  >
+                    {cancellingOrder === selectedOrder.id ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Cancelling...</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="w-5 h-5" />
+                        <span>Cancel Order</span>
+                      </>
+                    )}
+                  </button>
+                )}
                 {selectedOrder.status === 'delivered' && (
                   <button className="bg-[#9A8771] hover:bg-[#8B7355] text-white px-6 py-3 rounded-xl font-medium transition-colors">
                     Reorder

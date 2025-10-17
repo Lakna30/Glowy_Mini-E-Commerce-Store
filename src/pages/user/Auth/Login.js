@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useNotification } from '../../../contexts/NotificationContext';
 import { isAdminEmail } from '../../../constants/admin';
 import { Eye, EyeOff, Mail, ArrowRight} from "lucide-react";
 
@@ -12,30 +13,31 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { login, googleSignIn, role } = useAuth();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useNotification();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await login(email, password);
-      alert('Logged in successfully.');
+      showSuccess('Logged in successfully!');
       // Check if email is admin email for immediate redirect
       const redirectPath = isAdminEmail(email) ? '/admin' : '/';
       navigate(redirectPath);
     } catch (error) {
       console.error('Login error:', error);
-      alert('Login failed. Please check your credentials.');
+      showError('Login failed. Please check your credentials.');
     }
   };
 
   const handleGoogle = async () => {
     try {
       const user = await googleSignIn();
-      alert('Signed in with Google successfully.');
+      showSuccess('Signed in with Google successfully!');
       // Check if email is admin email for immediate redirect
       navigate(isAdminEmail(user?.email) ? '/admin' : '/');
     } catch (error) {
       console.error('Google sign-in error:', error);
-      alert('Google sign-in failed. Please try again.');
+      showError('Google sign-in failed. Please try again.');
     }
   };
 
