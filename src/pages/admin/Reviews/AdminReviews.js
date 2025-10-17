@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
 
 const AdminReviews = () => {
@@ -9,27 +9,17 @@ const AdminReviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        // Since we don't have a reviews collection yet, we'll create a mock data structure
-        // In a real app, you would fetch from a 'reviews' collection
-        const mockReviews = [
-          {
-            id: '1',
-            productName: 'Sample Product 1',
-            customerName: 'John Doe',
-            rating: 5,
-            comment: 'Great product, highly recommended!',
-            date: new Date('2024-01-15')
-          },
-          {
-            id: '2',
-            productName: 'Sample Product 2',
-            customerName: 'Jane Smith',
-            rating: 4,
-            comment: 'Good quality, fast shipping.',
-            date: new Date('2024-01-10')
-          }
-        ];
-        setReviews(mockReviews);
+        const reviewsRef = collection(db, 'reviews');
+        // Admin sees reviews which have a message and are not yet approved
+        const q = query(reviewsRef, where('comment', '!=', ''), where('approved', '==', false));
+        const snapshot = await getDocs(q);
+        const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => {
+            const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
+            const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
+            return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
+          });
+        setReviews(items);
       } catch (error) {
         console.error('Error fetching reviews:', error);
       } finally {
@@ -39,6 +29,24 @@ const AdminReviews = () => {
 
     fetchReviews();
   }, []);
+
+  const handleApprove = async (reviewId) => {
+    try {
+      await updateDoc(doc(db, 'reviews', reviewId), { approved: true });
+      setReviews(prev => prev.filter(r => r.id !== reviewId));
+    } catch (e) {
+      console.error('Approve failed', e);
+    }
+  };
+
+  const handleReject = async (reviewId) => {
+    try {
+      await updateDoc(doc(db, 'reviews', reviewId), { approved: false, rejected: true });
+      setReviews(prev => prev.filter(r => r.id !== reviewId));
+    } catch (e) {
+      console.error('Reject failed', e);
+    }
+  };
 
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
@@ -80,27 +88,21 @@ const AdminReviews = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-medium text-gray-900">
-                        {review.productName}
-                      </h3>
+                      <h3 className="text-lg font-medium text-gray-900">Review</h3>
                       <div className="flex items-center">
                         {renderStars(review.rating)}
                       </div>
                     </div>
                     <p className="text-gray-600 mb-2">{review.comment}</p>
                     <div className="flex items-center text-sm text-gray-500">
-                      <span>By {review.customerName}</span>
+                      <span>By {review.userName || review.userEmail}</span>
                       <span className="mx-2">•</span>
-                      <span>{review.date.toLocaleDateString()}</span>
+                      <span>{review.createdAt?.toDate ? review.createdAt.toDate().toLocaleDateString() : 'Recently'}</span>
                     </div>
                   </div>
                   <div className="flex space-x-2">
-                    <button className="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full hover:bg-green-200">
-                      Approve
-                    </button>
-                    <button className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded-full hover:bg-red-200">
-                      Reject
-                    </button>
+                    <button onClick={() => handleApprove(review.id)} className="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full hover:bg-green-200">Approve</button>
+                    <button onClick={() => handleReject(review.id)} className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded-full hover:bg-red-200">Reject</button>
                   </div>
                 </div>
               </div>

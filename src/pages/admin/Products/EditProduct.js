@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
+import { useNotification } from '../../../contexts/NotificationContext';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useNotification();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -77,10 +79,11 @@ const EditProduct = () => {
       };
 
       await updateDoc(productRef, updateData);
+      showSuccess('Product updated successfully!');
       navigate(`/admin/product/${id}`);
     } catch (error) {
       console.error('Error updating product:', error);
-      alert('Failed to update product. Please try again.');
+      showError('Failed to update product. Please try again.');
     } finally {
       setSaving(false);
     }

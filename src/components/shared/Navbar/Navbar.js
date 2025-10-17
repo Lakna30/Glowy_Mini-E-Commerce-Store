@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useCart } from "../../../contexts/CartContext";
+import { useNotification } from "../../../contexts/NotificationContext";
+import { useConfirmation } from "../../../contexts/ConfirmationContext";
 import { isAdminEmail } from "../../../constants/admin";
 import { Search, ShoppingCart } from "lucide-react";
 import CartDrawer from "../CartDrawer/CartDrawer";
@@ -9,6 +11,8 @@ import CartDrawer from "../CartDrawer/CartDrawer";
 const Navbar = () => {
   const { currentUser, logout } = useAuth();
   const { getTotalItems } = useCart();
+  const { showSuccess, showError } = useNotification();
+  const { showConfirmation } = useConfirmation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -19,11 +23,23 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = async () => {
+    const confirmed = await showConfirmation({
+      title: 'Logout',
+      message: 'Are you sure you want to logout? You will need to sign in again to access your account.',
+      confirmText: 'Yes, Logout',
+      cancelText: 'Stay Logged In',
+      type: 'logout'
+    });
+
+    if (!confirmed) return;
+
     try {
       await logout();
+      showSuccess('Logged out successfully!');
       navigate("/");
     } catch (error) {
       console.error("Failed to log out:", error);
+      showError('Failed to logout. Please try again.');
     }
   };
 

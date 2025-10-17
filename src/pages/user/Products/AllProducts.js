@@ -5,6 +5,7 @@ import { db } from '../../../config/firebase';
 import { X, CheckCircle, AlertCircle } from "lucide-react";
 import { Listbox } from "@headlessui/react";
 import { useCart } from '../../../contexts/CartContext';
+import { useNotification } from '../../../contexts/NotificationContext';
 
 const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
 
@@ -17,16 +18,10 @@ const AllProducts = () => {
   const [appliedFilters, setAppliedFilters] = useState([]);
   const [sortBy, setSortBy] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
-  const [notification, setNotification] = useState(null);
   
   // 🔹 Cart context
   const { addToCart } = useCart();
-
-  // 🔹 Notification functions
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
+  const { showSuccess, showError } = useNotification();
 
   // 🔹 Cart handling function
   const handleAddToCart = (product, e) => {
@@ -35,10 +30,10 @@ const AllProducts = () => {
     
     try {
       addToCart(product);
-      showNotification(`${product.name} added to cart successfully!`, 'success');
+      showSuccess(`${product.name} added to cart successfully!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      showNotification('Failed to add product to cart', 'error');
+      showError('Failed to add product to cart');
     }
   };
 
@@ -397,29 +392,6 @@ const AllProducts = () => {
         </section>
       </div>
       
-      {/* Notification Popup */}
-      {notification && (
-        <div className="fixed top-4 right-4 z-50 animate-slide-in">
-          <div className={`flex items-center space-x-3 px-6 py-4 rounded-lg shadow-lg max-w-sm ${
-            notification.type === 'success' 
-              ? 'bg-green-500 text-white' 
-              : 'bg-red-500 text-white'
-          }`}>
-            {notification.type === 'success' ? (
-              <CheckCircle className="w-6 h-6 flex-shrink-0" />
-            ) : (
-              <AlertCircle className="w-6 h-6 flex-shrink-0" />
-            )}
-            <p className="text-sm font-medium">{notification.message}</p>
-            <button
-              onClick={() => setNotification(null)}
-              className="ml-2 text-white hover:text-gray-200 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
