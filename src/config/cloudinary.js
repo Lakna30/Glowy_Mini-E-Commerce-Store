@@ -25,9 +25,8 @@ export const uploadToCloudinary = async (file, options = {}) => {
   if (options.folder) {
     formData.append('folder', options.folder);
   }
-  if (options.transformation) {
-    formData.append('transformation', options.transformation);
-  }
+  // Note: transformation parameter is not allowed for unsigned uploads
+  // Transformations should be applied via URL parameters when displaying images
 
   try {
     const response = await fetch(
