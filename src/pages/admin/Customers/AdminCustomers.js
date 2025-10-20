@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
+import { isAdminEmail } from '../../../constants/admin';
 
 const AdminCustomers = () => {
   const [customers, setCustomers] = useState([]);
@@ -11,10 +12,15 @@ const AdminCustomers = () => {
       try {
         const customersRef = collection(db, 'users');
         const customersSnapshot = await getDocs(customersRef);
-        const customersData = customersSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
+        const customersData = customersSnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          .filter(customer => {
+            // Filter out admin users
+            return !isAdminEmail(customer.email) && customer.role !== 'admin';
+          });
         setCustomers(customersData);
       } catch (error) {
         console.error('Error fetching customers:', error);
@@ -58,7 +64,7 @@ const AdminCustomers = () => {
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Join Date
+                    User ID
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -88,7 +94,7 @@ const AdminCustomers = () => {
                       {customer.email}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {customer.createdAt ? new Date(customer.createdAt.toDate()).toLocaleDateString() : 'N/A'}
+                      {customer.customId || customer.id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">

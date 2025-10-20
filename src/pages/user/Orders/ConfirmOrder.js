@@ -5,6 +5,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
+import { generateOrderId } from '../../../utils/idGenerator';
 import { ChevronLeft } from "lucide-react";
 
 const ConfirmOrder = () => {
@@ -130,7 +131,11 @@ const ConfirmOrder = () => {
         updatedAt: serverTimestamp()
       };
 
-      const docRef = await addDoc(collection(db, 'orders'), orderData);
+      const customOrderId = generateOrderId();
+      const docRef = await addDoc(collection(db, 'orders'), {
+        ...orderData,
+        customId: customOrderId
+      });
       
       // Clear cart only if not Buy Now flow
       if (!buyNowProduct) {

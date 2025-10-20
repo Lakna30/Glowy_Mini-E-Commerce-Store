@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
+import { generateProductId } from '../../../utils/idGenerator';
 import { uploadToCloudinary } from '../../../config/cloudinary';
 
 const AddProduct = () => {
@@ -225,8 +226,12 @@ const AddProduct = () => {
 
 
       try {
-        const docRef = await addDoc(collection(db, 'products'), productData);
-        setSuccess(`Product added successfully with ID: ${docRef.id}`);
+        const customProductId = generateProductId();
+        const docRef = await addDoc(collection(db, 'products'), {
+          ...productData,
+          customId: customProductId
+        });
+        setSuccess(`Product added successfully with ID: ${customProductId}`);
 
         // reset form
         setFormData({

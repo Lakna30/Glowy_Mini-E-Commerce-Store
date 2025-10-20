@@ -79,8 +79,8 @@ const MyOrders = () => {
     });
   };
 
-  const formatOrderId = (id) => {
-    return `ORD-${id.slice(-5).toUpperCase()}`;
+  const formatOrderId = (order) => {
+    return order.customId || `ORD-${order.id.slice(-5).toUpperCase()}`;
   };
 
   // Check if order can be cancelled (within 24 hours and status is pending)
@@ -98,7 +98,7 @@ const MyOrders = () => {
   const handleCancelOrder = async (order) => {
     const confirmed = await showConfirmation({
       title: 'Cancel Order',
-      message: `Are you sure you want to cancel order ${formatOrderId(order.id)}? This action cannot be undone and you will receive a full refund.`,
+      message: `Are you sure you want to cancel order ${formatOrderId(order)}? This action cannot be undone and you will receive a full refund.`,
       confirmText: 'Yes, Cancel Order',
       cancelText: 'Keep Order',
       type: 'cancel'
@@ -171,7 +171,7 @@ const MyOrders = () => {
                   {orders.map((order, index) => (
                     <tr key={order.id} className="border-b border-[#B8A082]">
                       <td className="px-6 py-4 text-sm text-[#2B2A29] font-medium">
-                        {formatOrderId(order.id)}
+                        {formatOrderId(order)}
                       </td>
                       <td className="px-6 py-4 text-sm text-[#2B2A29]">
                         {formatDate(order.createdAt)}
@@ -255,7 +255,7 @@ const MyOrders = () => {
             {/* Modal Header */}
             <div className="bg-[#9A8771] rounded-t-2xl px-8 py-6">
               <h2 className="text-2xl font-bold text-white mb-2">
-                Order Details - {formatOrderId(selectedOrder.id)}
+                Order Details - {formatOrderId(selectedOrder)}
               </h2>
               <p className="text-[#E3D2BD]">
                 Order placed on {formatDate(selectedOrder.createdAt)}
@@ -271,7 +271,7 @@ const MyOrders = () => {
                   <div className="space-y-3 text-sm text-[#2B2A29]">
                     <div className="flex justify-between">
                       <span className="font-medium">Order ID:</span>
-                      <span>{formatOrderId(selectedOrder.id)}</span>
+                      <span>{formatOrderId(selectedOrder)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="font-medium">Order Date:</span>
