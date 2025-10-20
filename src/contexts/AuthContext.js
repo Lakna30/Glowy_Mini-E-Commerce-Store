@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
+import { generateUserId } from '../utils/idGenerator';
 import { ADMIN_EMAILS } from '../constants/admin';
 
 const AuthContext = createContext();
@@ -39,10 +40,12 @@ export function AuthProvider({ children }) {
           console.warn('Profile update failed:', profileError);
         }
 
-        // Create Firestore user document (best-effort)
+        // Create Firestore user document with custom ID (best-effort)
         try {
-          await setDoc(doc(db, 'users', user.uid), {
+          const customUserId = generateUserId();
+          await setDoc(doc(db, 'users', customUserId), {
             uid: user.uid,
+            customId: customUserId,
             email: user.email,
             fullName: additionalData.firstName || '',
             role: 'user'

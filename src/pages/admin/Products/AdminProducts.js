@@ -21,7 +21,34 @@ const AdminProducts = () => {
           id: doc.id,
           ...doc.data()
         }));
-        setProducts(productsData);
+        
+        // Sort products: expired and out-of-stock first, then by name
+        const sortedProducts = productsData.sort((a, b) => {
+          const now = new Date();
+          
+          // Check if products are expired
+          const aExpired = a.expiryDate && new Date(a.expiryDate) < now;
+          const bExpired = b.expiryDate && new Date(b.expiryDate) < now;
+          
+          // Check if products are out of stock
+          const aOutOfStock = a.stockQuantity <= 0;
+          const bOutOfStock = b.stockQuantity <= 0;
+          
+          // Priority 1: Expired products first
+          if (aExpired && !bExpired) return -1;
+          if (!aExpired && bExpired) return 1;
+          
+          // Priority 2: Out of stock products (but not expired)
+          if (!aExpired && !bExpired) {
+            if (aOutOfStock && !bOutOfStock) return -1;
+            if (!aOutOfStock && bOutOfStock) return 1;
+          }
+          
+          // Priority 3: Sort by name alphabetically
+          return (a.name || '').localeCompare(b.name || '');
+        });
+        
+        setProducts(sortedProducts);
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -110,8 +137,13 @@ const AdminProducts = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {products.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
+                {products.map((product) => {
+                  const now = new Date();
+                  const isExpired = product.expiryDate && new Date(product.expiryDate) < now;
+                  const isOutOfStock = product.stockQuantity <= 0;
+                  
+                  return (
+                  <tr key={product.id} className={`hover:bg-gray-50 ${isExpired ? 'bg-red-50' : isOutOfStock ? 'bg-yellow-50' : ''}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-12 w-12">
@@ -135,11 +167,18 @@ const AdminProducts = () => {
                       LKR {product.price}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.stockQuantity > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : 'Out of stock'}
-                      </span>
+                      <div className="flex flex-col space-y-1">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          product.stockQuantity > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {product.stockQuantity > 0 ? `${product.stockQuantity} in stock` : 'Out of stock'}
+                        </span>
+                        {isExpired && (
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            EXPIRED
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {product.category || 'Uncategorized'}
@@ -169,7 +208,8 @@ const AdminProducts = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
