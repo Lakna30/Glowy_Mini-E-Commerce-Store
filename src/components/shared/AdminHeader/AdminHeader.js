@@ -2,7 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useConfirmation } from '../../../contexts/ConfirmationContext';
-import { Search, Bell, User, Settings, LogOut } from 'lucide-react';
+import { Search, Bell, User, Settings, LogOut, Check } from 'lucide-react';
+import { useAdminNotifications } from '../../../contexts/AdminNotificationsContext';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
@@ -87,13 +88,8 @@ const AdminHeader = () => {
     // Implement search functionality
   };
 
-  const notifications = [
-    { id: 1, message: 'New order received', time: '2 min ago', unread: true },
-    { id: 2, message: 'Product review pending', time: '1 hour ago', unread: true },
-    { id: 3, message: 'Low stock alert', time: '3 hours ago', unread: false },
-  ];
-
-  const unreadCount = notifications.filter(n => n.unread).length;
+  // Notifications
+  const { notifications, markAsRead, markAllAsRead, unreadCount } = useAdminNotifications();
 
   return (
     <header className="bg-gray-100 border-b border-gray-200 px-6 py-4">
@@ -133,8 +129,14 @@ const AdminHeader = () => {
             {/* Notification Dropdown */}
             {isNotificationOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                <div className="p-4 border-b border-gray-200">
+                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-sm text-[#DDBB92] hover:text-[#B8A082]"
+                  >
+                    Mark all as read
+                  </button>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.map((notification) => (
@@ -144,8 +146,21 @@ const AdminHeader = () => {
                         notification.unread ? 'bg-blue-50' : ''
                       }`}
                     >
-                      <p className="text-sm text-gray-900">{notification.message}</p>
-                      <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-sm text-gray-900">{notification.message}</p>
+                          <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                        </div>
+                        {notification.unread && (
+                          <button
+                            onClick={() => markAsRead(notification.id)}
+                            className="text-green-600 hover:text-green-800"
+                            title="Mark as read"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
