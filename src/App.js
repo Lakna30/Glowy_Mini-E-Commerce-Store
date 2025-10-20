@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { ConfirmationProvider } from './contexts/ConfirmationContext';
+import { AdminNotificationsProvider } from './contexts/AdminNotificationsContext';
 
 // User Pages
 import Home from './pages/user/Home/Home';
@@ -74,6 +75,7 @@ function App() {
       <CartProvider>
         <NotificationProvider>
           <ConfirmationProvider>
+            <AdminNotificationsProvider>
             <Router>
           <Layout>
             <Routes>
@@ -203,6 +205,7 @@ function App() {
             </Routes>
           </Layout>
             </Router>
+            </AdminNotificationsProvider>
           </ConfirmationProvider>
         </NotificationProvider>
       </CartProvider>

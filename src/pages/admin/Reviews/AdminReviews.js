@@ -1,25 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, where, orderBy, updateDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../../config/firebase';
 
 const AdminReviews = () => {
-  const [reviews, setReviews] = useState([]);
+  const [pendingReviews, setPendingReviews] = useState([]);
+  const [approvedReviews, setApprovedReviews] = useState([]);
+  const [rejectedReviews, setRejectedReviews] = useState([]);
+  const [activeTab, setActiveTab] = useState('pending');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         const reviewsRef = collection(db, 'reviews');
-        // Admin sees reviews which have a message and are not yet approved
-        const q = query(reviewsRef, where('comment', '!=', ''), where('approved', '==', false));
-        const snapshot = await getDocs(q);
-        const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
+        const qPending = query(reviewsRef, where('approved', '==', false));
+        const qApproved = query(reviewsRef, where('approved', '==', true));
+        const qRejected = query(reviewsRef, where('rejected', '==', true));
+
+        const [snapPending, snapApproved, snapRejected] = await Promise.all([
+          getDocs(qPending),
+          getDocs(qApproved),
+          getDocs(qRejected)
+        ]);
+
+        const toSorted = (arr) => arr
+          .filter(r => typeof r.comment === 'string' && r.comment.trim().length > 0)
           .sort((a, b) => {
             const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
             const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
             return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
           });
-        setReviews(items);
+
+        const pending = snapPending.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter(r => !r.rejected && !r.approved);
+        const approved = snapApproved.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter(r => r.approved && !r.rejected);
+        const rejected = snapRejected.docs
+          .map(d => ({ id: d.id, ...d.data() }))
+          .filter(r => r.rejected && !r.approved);
+
+        setPendingReviews(toSorted(pending));
+        setApprovedReviews(toSorted(approved));
+        setRejectedReviews(toSorted(rejected));
       } catch (error) {
         console.error('Error fetching reviews:', error);
       } finally {
@@ -32,8 +56,20 @@ const AdminReviews = () => {
 
   const handleApprove = async (reviewId) => {
     try {
-      await updateDoc(doc(db, 'reviews', reviewId), { approved: true });
-      setReviews(prev => prev.filter(r => r.id !== reviewId));
+      await updateDoc(doc(db, 'reviews', reviewId), { approved: true, rejected: false });
+      setPendingReviews(prev => {
+        const moved = prev.find(r => r.id === reviewId);
+        const remaining = prev.filter(r => r.id !== reviewId);
+        if (moved) {
+          const updated = { ...moved, approved: true, rejected: false };
+          setApprovedReviews(curr => [updated, ...curr].sort((a, b) => {
+            const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
+            const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
+            return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
+          }));
+        }
+        return remaining;
+      });
     } catch (e) {
       console.error('Approve failed', e);
     }
@@ -42,7 +78,19 @@ const AdminReviews = () => {
   const handleReject = async (reviewId) => {
     try {
       await updateDoc(doc(db, 'reviews', reviewId), { approved: false, rejected: true });
-      setReviews(prev => prev.filter(r => r.id !== reviewId));
+      setPendingReviews(prev => {
+        const moved = prev.find(r => r.id === reviewId);
+        const remaining = prev.filter(r => r.id !== reviewId);
+        if (moved) {
+          const updated = { ...moved, approved: false, rejected: true };
+          setRejectedReviews(curr => [updated, ...curr].sort((a, b) => {
+            const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
+            const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
+            return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
+          }));
+        }
+        return remaining;
+      });
     } catch (e) {
       console.error('Reject failed', e);
     }
@@ -69,6 +117,57 @@ const AdminReviews = () => {
     );
   }
 
+  const renderReviewList = (reviews, showActions = false) => {
+    if (reviews.length === 0) {
+      return (
+        <div className="text-center py-8 text-gray-500">
+          No reviews found
+        </div>
+      );
+    }
+
+    return (
+      <div className="divide-y divide-gray-200">
+        {reviews.map((review) => (
+          <div key={review.id} className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center space-x-3 mb-2">
+                  <h3 className="text-lg font-medium text-gray-900">Review</h3>
+                  <div className="flex items-center">
+                    {renderStars(review.rating)}
+                  </div>
+                </div>
+                <p className="text-gray-600 mb-2">{review.comment}</p>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span>By {review.userName || review.userEmail}</span>
+                  <span className="mx-2">•</span>
+                  <span>{review.createdAt?.toDate ? review.createdAt.toDate().toLocaleDateString() : 'Recently'}</span>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                {showActions ? (
+                  <>
+                    <button onClick={() => handleApprove(review.id)} className="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full hover:bg-green-200">Approve</button>
+                    <button onClick={() => handleReject(review.id)} className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded-full hover:bg-red-200">Reject</button>
+                  </>
+                ) : (
+                  <span className={`px-3 py-1 text-sm rounded-full h-fit ${
+                    activeTab === 'approved' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {activeTab === 'approved' ? 'Approved' : 'Rejected'}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="admin-reviews">
       <div className="mb-8">
@@ -76,43 +175,53 @@ const AdminReviews = () => {
         <p className="text-gray-600">Monitor and manage customer reviews.</p>
       </div>
 
+      {/* Tab Buttons */}
+      <div className="flex space-x-4 mb-6">
+        <button
+          onClick={() => setActiveTab('pending')}
+          className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            activeTab === 'pending'
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Pending ({pendingReviews.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('approved')}
+          className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            activeTab === 'approved'
+              ? 'bg-green-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Approved ({approvedReviews.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('rejected')}
+          className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            activeTab === 'rejected'
+              ? 'bg-red-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          Rejected ({rejectedReviews.length})
+        </button>
+      </div>
+
+      {/* Content Area */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold">All Reviews</h2>
+          <h2 className="text-xl font-semibold">
+            {activeTab === 'pending' && 'Pending Reviews'}
+            {activeTab === 'approved' && 'Approved Reviews'}
+            {activeTab === 'rejected' && 'Rejected Reviews'}
+          </h2>
         </div>
         
-        {reviews.length > 0 ? (
-          <div className="divide-y divide-gray-200">
-            {reviews.map((review) => (
-              <div key={review.id} className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-medium text-gray-900">Review</h3>
-                      <div className="flex items-center">
-                        {renderStars(review.rating)}
-                      </div>
-                    </div>
-                    <p className="text-gray-600 mb-2">{review.comment}</p>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <span>By {review.userName || review.userEmail}</span>
-                      <span className="mx-2">•</span>
-                      <span>{review.createdAt?.toDate ? review.createdAt.toDate().toLocaleDateString() : 'Recently'}</span>
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button onClick={() => handleApprove(review.id)} className="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full hover:bg-green-200">Approve</button>
-                    <button onClick={() => handleReject(review.id)} className="px-3 py-1 text-sm bg-red-100 text-red-800 rounded-full hover:bg-red-200">Reject</button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            No reviews found
-          </div>
-        )}
+        {activeTab === 'pending' && renderReviewList(pendingReviews, true)}
+        {activeTab === 'approved' && renderReviewList(approvedReviews, false)}
+        {activeTab === 'rejected' && renderReviewList(rejectedReviews, false)}
       </div>
     </div>
   );
