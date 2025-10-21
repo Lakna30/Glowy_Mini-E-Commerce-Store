@@ -57,19 +57,27 @@ const AdminReviews = () => {
   const handleApprove = async (reviewId) => {
     try {
       await updateDoc(doc(db, 'reviews', reviewId), { approved: true, rejected: false });
-      setPendingReviews(prev => {
-        const moved = prev.find(r => r.id === reviewId);
-        const remaining = prev.filter(r => r.id !== reviewId);
-        if (moved) {
-          const updated = { ...moved, approved: true, rejected: false };
-          setApprovedReviews(curr => [updated, ...curr].sort((a, b) => {
-            const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
-            const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
-            return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
-          }));
-        }
-        return remaining;
-      });
+      
+      // Remove from pending and add to approved
+      setPendingReviews(prev => prev.filter(r => r.id !== reviewId));
+      
+      // Find the review in pending to move to approved
+      const reviewToApprove = pendingReviews.find(r => r.id === reviewId);
+      if (reviewToApprove) {
+        const updatedReview = { ...reviewToApprove, approved: true, rejected: false };
+        setApprovedReviews(prev => {
+          // Check if review already exists to prevent duplicates
+          const exists = prev.some(r => r.id === reviewId);
+          if (!exists) {
+            return [updatedReview, ...prev].sort((a, b) => {
+              const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
+              const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
+              return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
+            });
+          }
+          return prev;
+        });
+      }
     } catch (e) {
       console.error('Approve failed', e);
     }
@@ -78,19 +86,27 @@ const AdminReviews = () => {
   const handleReject = async (reviewId) => {
     try {
       await updateDoc(doc(db, 'reviews', reviewId), { approved: false, rejected: true });
-      setPendingReviews(prev => {
-        const moved = prev.find(r => r.id === reviewId);
-        const remaining = prev.filter(r => r.id !== reviewId);
-        if (moved) {
-          const updated = { ...moved, approved: false, rejected: true };
-          setRejectedReviews(curr => [updated, ...curr].sort((a, b) => {
-            const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
-            const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
-            return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
-          }));
-        }
-        return remaining;
-      });
+      
+      // Remove from pending and add to rejected
+      setPendingReviews(prev => prev.filter(r => r.id !== reviewId));
+      
+      // Find the review in pending to move to rejected
+      const reviewToReject = pendingReviews.find(r => r.id === reviewId);
+      if (reviewToReject) {
+        const updatedReview = { ...reviewToReject, approved: false, rejected: true };
+        setRejectedReviews(prev => {
+          // Check if review already exists to prevent duplicates
+          const exists = prev.some(r => r.id === reviewId);
+          if (!exists) {
+            return [updatedReview, ...prev].sort((a, b) => {
+              const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : (a.createdAt || 0);
+              const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : (b.createdAt || 0);
+              return (bDate instanceof Date ? bDate.getTime() : bDate) - (aDate instanceof Date ? aDate.getTime() : aDate);
+            });
+          }
+          return prev;
+        });
+      }
     } catch (e) {
       console.error('Reject failed', e);
     }

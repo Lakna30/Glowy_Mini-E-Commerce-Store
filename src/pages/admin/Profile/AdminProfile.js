@@ -8,6 +8,7 @@ const AdminProfile = () => {
   const { currentUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [profileData, setProfileData] = useState({
     displayName: currentUser?.displayName || '',
     email: currentUser?.email || '',
@@ -76,6 +77,8 @@ const AdminProfile = () => {
         });
       }
       setIsEditing(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error('Failed to update profile:', error);
       alert('Failed to save changes. Please try again.');
@@ -84,6 +87,16 @@ const AdminProfile = () => {
 
   return (
     <div className="admin-profile min-h-screen bg-gray-50 py-8">
+      {/* Success Popup */}
+      {showSuccess && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          <span>Profile updated successfully!</span>
+        </div>
+      )}
+      
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold mb-2">Admin Profile</h1>

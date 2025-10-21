@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Mail, Phone, MapPin, User, Edit2, Save, X } from 'lucide-react';
 import { db } from '../../../config/firebase';
 import { useAuth } from '../../../contexts/AuthContext';
-import { doc, getDoc, updateDoc, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 
 // Define brand colors for easy reference
@@ -20,6 +20,7 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
   
   const [userData, setUserData] = useState({
     fullName: '',
@@ -27,6 +28,7 @@ const UserProfile = () => {
     phone: '',
     address: ''
   });
+  const [inputKey, setInputKey] = useState(0);
 
   // Format address from shipping info
   const formatAddress = (shippingInfo) => {
@@ -38,9 +40,8 @@ const UserProfile = () => {
     ].filter(Boolean).join(', ');
   };
 
-  // Fetch user data on component mount
-  useEffect(() => {
-    const fetchUserData = async () => {
+  // Fetch user data on component mount - memoized to prevent unnecessary re-runs
+  const fetchUserData = useCallback(async () => {
       if (!currentUser) return;
       
       try {
@@ -119,18 +120,25 @@ const UserProfile = () => {
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchUserData();
   }, [currentUser]);
 
-  const handleChange = (e) => {
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setUserData(prev => ({
       ...prev,
       [name]: value
     }));
-  };
+  }, []);
+
+  // Force input re-render when editing starts
+  const handleEditStart = useCallback(() => {
+    setIsEditing(true);
+    setInputKey(prev => prev + 1);
+  }, []);
 
   const handleSave = async () => {
     if (!currentUser) return;
@@ -146,8 +154,25 @@ const UserProfile = () => {
         updatedAt: new Date().toISOString()
       };
 
-      // Update Firestore
-      await updateDoc(doc(db, 'users', currentUser.uid), updateData, { merge: true });
+      // Check if user document exists, create if it doesn't
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (!userDoc.exists()) {
+        // Create user document if it doesn't exist
+        await setDoc(userDocRef, {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          fullName: updateData.fullName,
+          phone: updateData.phone,
+          address: updateData.address,
+          createdAt: new Date().toISOString(),
+          updatedAt: updateData.updatedAt
+        });
+      } else {
+        // Update existing document
+        await updateDoc(userDocRef, updateData, { merge: true });
+      }
       
       // Update auth display name if changed
       if (currentUser.displayName !== updateData.fullName) {
@@ -157,6 +182,8 @@ const UserProfile = () => {
       }
       
       setIsEditing(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error('Error updating profile:', error);
       setError('Failed to update profile. Please try again.');
@@ -178,33 +205,6 @@ const UserProfile = () => {
     setError('');
   };
 
-  // Component to render a single profile field
-  const ProfileField = ({ icon: Icon, label, value, name, type = 'text', readOnly = false }) => (
-    <div className="flex items-start space-x-4 mb-6">
-      <div className={`p-2 rounded-full bg-[${BRAND_COLORS.charcoalCard}]`}>
-        <Icon className={`w-5 h-5 text-[${BRAND_COLORS.lightAccent}]`} />
-      </div>
-      <div className="flex-1">
-        <label className="block text-sm font-medium text-gray-300 mb-1">
-          {label}
-        </label>
-        {isEditing && !readOnly ? (
-          <input
-            type={type}
-            name={name}
-            value={value || ''}
-            onChange={handleChange}
-            disabled={loading}
-            className={`w-full p-2 rounded-lg border border-[${BRAND_COLORS.darkBrown}] bg-[${BRAND_COLORS.charcoalCard}] text-white focus:outline-none focus:ring-2 focus:ring-[${BRAND_COLORS.lightAccent}]`}
-          />
-        ) : (
-          <p className={`text-[${BRAND_COLORS.lightText}] ${!value ? 'text-gray-500 italic' : ''}`}>
-            {value || 'Not provided'}
-          </p>
-        )}
-      </div>
-    </div>
-  );
 
   if (loading && !userData.email) {
     return (
@@ -216,6 +216,16 @@ const UserProfile = () => {
 
   return (
     <div className={`${gradientClass} min-h-screen py-12 px-4 sm:px-6 lg:px-8`}>
+      {/* Success Popup */}
+      {showSuccess && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          <span>Profile updated successfully!</span>
+        </div>
+      )}
+      
       <div className="max-w-3xl mx-auto">
         <div className="bg-[#35312C] rounded-2xl shadow-xl overflow-hidden">
           {/* Header */}
@@ -229,7 +239,7 @@ const UserProfile = () => {
               </div>
               {!isEditing ? (
                 <button
-                  onClick={() => setIsEditing(true)}
+                  onClick={handleEditStart}
                   className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-[#2B2A29] bg-[#DDBB92] hover:bg-[#C9A87A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#DDBB92] transition-colors"
                 >
                   <Edit2 className="h-4 w-4 mr-2" />
@@ -267,36 +277,101 @@ const UserProfile = () => {
             )}
 
             <div className="space-y-6">
-              <ProfileField 
-                icon={User} 
-                label="Full Name" 
-                value={userData.fullName} 
+              {/* Full Name Field */}
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="p-2 rounded-full bg-[#35312C]">
+                  <User className="w-5 h-5 text-[#DDBB92]" />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Full Name
+                  </label>
+                  {isEditing ? (
+                    <input
+                      key={`fullName-${inputKey}`}
+                      type="text"
                 name="fullName"
-              />
+                      value={userData.fullName || ''}
+                      onChange={handleChange}
+                      disabled={loading}
+                      className="w-full p-2 rounded-lg border border-[#484139] bg-[#35312C] text-white focus:outline-none focus:ring-2 focus:ring-[#DDBB92]"
+                    />
+                  ) : (
+                    <p className={`text-[#E3D5C5] ${!userData.fullName ? 'text-gray-500 italic' : ''}`}>
+                      {userData.fullName || 'Not provided'}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-              <ProfileField 
-                icon={Mail} 
-                label="Email Address" 
-                value={userData.email} 
-                name="email"
-                type="email"
-                readOnly
-              />
+              {/* Email Field */}
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="p-2 rounded-full bg-[#35312C]">
+                  <Mail className="w-5 h-5 text-[#DDBB92]" />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Email Address
+                  </label>
+                  <p className={`text-[#E3D5C5] ${!userData.email ? 'text-gray-500 italic' : ''}`}>
+                    {userData.email || 'Not provided'}
+                  </p>
+                </div>
+              </div>
 
-              <ProfileField 
-                icon={Phone} 
-                label="Phone Number" 
-                value={userData.phone} 
+              {/* Phone Field */}
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="p-2 rounded-full bg-[#35312C]">
+                  <Phone className="w-5 h-5 text-[#DDBB92]" />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Phone Number
+                  </label>
+                  {isEditing ? (
+                    <input
+                      key={`phone-${inputKey}`}
+                      type="tel"
                 name="phone"
-                type="tel"
-              />
+                      value={userData.phone || ''}
+                      onChange={handleChange}
+                      disabled={loading}
+                      className="w-full p-2 rounded-lg border border-[#484139] bg-[#35312C] text-white focus:outline-none focus:ring-2 focus:ring-[#DDBB92]"
+                    />
+                  ) : (
+                    <p className={`text-[#E3D5C5] ${!userData.phone ? 'text-gray-500 italic' : ''}`}>
+                      {userData.phone || 'Not provided'}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-              <ProfileField 
-                icon={MapPin} 
-                label="Shipping Address" 
-                value={userData.address} 
+              {/* Address Field */}
+              <div className="flex items-start space-x-4 mb-6">
+                <div className="p-2 rounded-full bg-[#35312C]">
+                  <MapPin className="w-5 h-5 text-[#DDBB92]" />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Shipping Address
+                  </label>
+                  {isEditing ? (
+                    <input
+                      key={`address-${inputKey}`}
+                      type="text"
                 name="address"
-              />
+                      value={userData.address || ''}
+                      onChange={handleChange}
+                      disabled={loading}
+                      className="w-full p-2 rounded-lg border border-[#484139] bg-[#35312C] text-white focus:outline-none focus:ring-2 focus:ring-[#DDBB92]"
+                    />
+                  ) : (
+                    <p className={`text-[#E3D5C5] ${!userData.address ? 'text-gray-500 italic' : ''}`}>
+                      {userData.address || 'Not provided'}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
