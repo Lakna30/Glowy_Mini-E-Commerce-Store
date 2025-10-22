@@ -1,5 +1,6 @@
 import React, { useState } from 'react'; // Import useState
-import { Mail, Phone, MapPin, Send, Instagram, Facebook } from 'lucide-react'; 
+import { Mail, Phone, MapPin, Send, Instagram, Facebook } from 'lucide-react';
+import { useNotification } from '../../../contexts/NotificationContext'; 
 
 // Define brand colors for easy reference
 const BRAND_COLORS = {
@@ -17,6 +18,12 @@ const ContactUs = () => {
     message: '',
   });
 
+  // 2. Notification hook
+  const { showSuccess, showError } = useNotification();
+
+  // 3. Loading state for form submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   // 2. Handler for input changes
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -33,11 +40,33 @@ const ContactUs = () => {
 
   const gradientClass = "bg-gradient-to-b from-[#484139] via-[#544C44] via-[#5D554C] via-[#655E54] to-[#6B5B4F]";
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isFormValid) {
+    if (isFormValid && !isSubmitting) {
+      setIsSubmitting(true);
+      try {
+        // Simulate API call - replace with actual API endpoint
         console.log("Form Submitted:", formData);
-        // Add your form submission logic here (e.g., API call)
+        
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Show success notification
+        showSuccess("Message sent successfully! We'll get back to you soon.", 5000);
+        
+        // Reset form after successful submission
+        setFormData({
+          name: '',
+          email: '',
+          message: '',
+        });
+        
+      } catch (error) {
+        console.error("Error sending message:", error);
+        showError("Failed to send message. Please try again.", 5000);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -116,15 +145,24 @@ const ContactUs = () => {
               {/* Submit Button (Conditional Styling and Disabled state) */}
               <button
                 type="submit"
-                disabled={!isFormValid} // Button is disabled if the form is NOT valid
+                disabled={!isFormValid || isSubmitting} // Button is disabled if the form is NOT valid or submitting
                 className={`w-full md:w-auto flex items-center justify-center px-8 py-3 rounded-full font-bold text-lg shadow-lg transition duration-300
-                  ${isFormValid 
+                  ${isFormValid && !isSubmitting
                     ? `bg-[${BRAND_COLORS.lightAccent}] text-[${BRAND_COLORS.darkBrown}] hover:bg-opacity-90` // Enabled style
                     : 'bg-gray-500/50 text-gray-300 cursor-not-allowed'} // Disabled style
                 `}
               >
-                <Send className="w-5 h-5 mr-3" />
-                Send Message
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 mr-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5 mr-3" />
+                    Send Message
+                  </>
+                )}
               </button>
             </form>
           </div>
